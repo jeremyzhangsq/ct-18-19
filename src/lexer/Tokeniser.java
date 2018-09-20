@@ -5,6 +5,7 @@ import lexer.Token.TokenClass;
 import javax.xml.transform.ErrorListener;
 import java.io.EOFException;
 import java.io.IOException;
+import java.util.*;
 
 /**
  * @author cdubach
@@ -12,8 +13,19 @@ import java.io.IOException;
 public class Tokeniser {
 
     private Scanner scanner;
-
     private int error = 0;
+    public final static Map<String,TokenClass> RESERVED= new HashMap<>();
+    static {
+        RESERVED.put("int",TokenClass.INT);
+        RESERVED.put("char",TokenClass.CHAR);
+        RESERVED.put("void",TokenClass.VOID);
+        RESERVED.put("if",TokenClass.IF);
+        RESERVED.put("else",TokenClass.ELSE);
+        RESERVED.put("while",TokenClass.WHILE);
+        RESERVED.put("return",TokenClass.RETURN);
+        RESERVED.put("struct",TokenClass.STRUCT);
+        RESERVED.put("sizeof",TokenClass.SIZEOF);
+    }
     public int getErrorCount() {
 	return this.error;
     }
@@ -73,6 +85,10 @@ public class Tokeniser {
             return new Token(TokenClass.REM, line, column);
         else if (c == '=')
             return new Token(TokenClass.ASSIGN, line, column);
+        else if (c == '<')
+            return new Token(TokenClass.LT, line, column);
+        else if (c == '>')
+            return new Token(TokenClass.GT, line, column);
         else if (c == '{')
             return new Token(TokenClass.LBRA, line, column);
         else if (c == '}')
@@ -95,11 +111,77 @@ public class Tokeniser {
             return new Token(TokenClass.BIAND, line, column);
         else if (c == '|')
             return new Token(TokenClass.BIOR, line, column);
+        //  recognize #include
+        else if (c == '#'){
+            StringBuilder sb = new StringBuilder();
+            c = scanner.peek();
+            while(!Character.isWhitespace(c)){
+                sb.append(c);
+                scanner.next();
+                c = scanner.peek();
+            }
+            line = scanner.getLine();
+            column = scanner.getColumn();
+            if(sb.toString().equals("include"))
+                return new Token(TokenClass.INCLUDE, line, column);
+        }
+        //  recognize identifier and keyword
+        else if (Character.isLetter(c)){
+            StringBuilder sb = new StringBuilder();
+            sb.append(c);
+            c = scanner.peek();
+            while(Character.isLetterOrDigit(c) || c == '_'){
+                sb.append(c);
+                scanner.next();
+                c = scanner.peek();
+            }
+            line = scanner.getLine();
+            column = scanner.getColumn();
+            if(RESERVED.containsKey(sb.toString()))
+                return new Token(RESERVED.get(sb.toString()), line, column);
+            else
+                return new Token(TokenClass.IDENTIFIER, sb.toString(), line, column);
+        }
+        // recognize number
+        else if (Character.isDigit(c)){
+            StringBuilder sb = new StringBuilder();
+            sb.append(c);
+            c = scanner.peek();
+            while(Character.isDigit(c)){
+                sb.append(c);
+                scanner.next();
+                c = scanner.peek();
+            }
+            line = scanner.getLine();
+            column = scanner.getColumn();
+            return new Token(TokenClass.INT_LITERAL, sb.toString(), line, column);
+        }
+        // recognize string_literal and char_literal
+        else if(c == '"'|| c== '\''){
+            return getLiteral(c);
+        }
 
         // if we reach this point, it means we did not recognise a valid token
         error(c, line, column);
         return new Token(TokenClass.INVALID, line, column);
     }
 
+    private Token getLiteral(char ch) throws IOException{
+        StringBuilder sb = new StringBuilder();
+        sb.append(ch);
+        char c = scanner.peek();
+        while(c != ch){
+            sb.append(c);
+            scanner.next();
+            c = scanner.peek();
+        }
+        sb.append(c);
+        scanner.next();
+        if(ch == '\'')
+            return new Token(TokenClass.CHAR_LITERAL, sb.toString(), scanner.getLine(), scanner.getColumn());
+        else if(ch == '"')
+            return new Token(TokenClass.STRING_LITERAL, sb.toString(), scanner.getLine(), scanner.getColumn());
+        return new Token(TokenClass.INVALID, scanner.getLine(), scanner.getColumn());
+    }
 
 }
