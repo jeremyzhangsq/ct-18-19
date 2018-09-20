@@ -2,6 +2,7 @@ package lexer;
 
 import lexer.Token.TokenClass;
 
+import javax.xml.transform.ErrorListener;
 import java.io.EOFException;
 import java.io.IOException;
 
@@ -58,12 +59,42 @@ public class Tokeniser {
         if (Character.isWhitespace(c))
             return next();
 
-        // recognises the plus operator
+        // ... to be completed
+        // recognises the operator
         if (c == '+')
             return new Token(TokenClass.PLUS, line, column);
-
-        // ... to be completed
-
+        else if (c == '-')
+            return new Token(TokenClass.MINUS, line, column);
+        else if (c == '*')
+            return new Token(TokenClass.ASTERIX, line, column);
+        else if (c == '/')
+            return new Token(TokenClass.DIV, line, column);
+        else if (c == '%')
+            return new Token(TokenClass.REM, line, column);
+        else if (c == '=')
+            return new Token(TokenClass.ASSIGN, line, column);
+        else if (c == '{')
+            return new Token(TokenClass.LBRA, line, column);
+        else if (c == '}')
+            return new Token(TokenClass.RBRA, line, column);
+        else if (c == '(')
+            return new Token(TokenClass.LPAR, line, column);
+        else if (c == ')')
+            return new Token(TokenClass.RPAR, line, column);
+        else if (c == '[')
+            return new Token(TokenClass.LSBR, line, column);
+        else if (c == ']')
+            return new Token(TokenClass.RSBR, line, column);
+        else if (c == ';')
+            return new Token(TokenClass.SC, line, column);
+        else if (c == ',')
+            return new Token(TokenClass.COMMA, line, column);
+        else if (c == '.')
+            return new Token(TokenClass.DOT, line, column);
+        else if (c == '&')
+            return new Token(TokenClass.BIAND, line, column);
+        else if (c == '|')
+            return new Token(TokenClass.BIOR, line, column);
 
         // if we reach this point, it means we did not recognise a valid token
         error(c, line, column);
