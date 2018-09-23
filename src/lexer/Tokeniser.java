@@ -203,8 +203,42 @@ public class Tokeniser {
             return new Token(TokenClass.INT_LITERAL, sb.toString(), line, column);
         }
         // recognize string_literal and char_literal
-        else if(c == '"'|| c== '\''){
-            return getLiteral(c,line,column);
+        else if(c == '"'){
+            StringBuilder sb = new StringBuilder();
+            sb.append(c);
+            c = scanner.peek();
+            char pre = ' ';
+            while(true){
+                sb.append(c);
+                pre = c;
+                scanner.next();
+                c = scanner.peek();
+                if(c=='"' && pre!='\\') break;
+            }
+            sb.append(c);
+            scanner.next();
+            return new Token(TokenClass.STRING_LITERAL, sb.toString(), line, column);
+        }
+        else if(c == '\''){
+            StringBuilder sb = new StringBuilder();
+            sb.append(c);
+            c=scanner.peek();
+
+            if(c=='\\')
+                for(int i =0;i<2;i++,scanner.next(),c=scanner.peek()) {
+                    sb.append(c);
+                }
+            else
+                for(int i =0;i<1;i++,c=scanner.peek(),scanner.next(),c=scanner.peek()) {
+                    sb.append(c);
+                }
+
+            if(c=='\''){
+                sb.append(c);
+                scanner.next();
+                return new Token(TokenClass.CHAR_LITERAL, sb.toString(), line, column);
+            }
+
         }
 
         // if we reach this point, it means we did not recognise a valid token
@@ -212,26 +246,5 @@ public class Tokeniser {
         return new Token(TokenClass.INVALID, line, column);
     }
 
-    private Token getLiteral(char ch, int line, int col) throws IOException{
-        StringBuilder sb = new StringBuilder();
-        sb.append(ch);
-        char c = scanner.peek();
-        char pre = ' ';
-        while(true){
-            sb.append(c);
-            pre = c;
-            scanner.next();
-            c = scanner.peek();
-            if(c==ch && pre!='\\') break;
-
-        }
-        sb.append(c);
-        scanner.next();
-        if(ch == '\'')
-            return new Token(TokenClass.CHAR_LITERAL, sb.toString(), line, col);
-        else if(ch == '"')
-            return new Token(TokenClass.STRING_LITERAL, sb.toString(), line, col);
-        return new Token(TokenClass.INVALID, line, col);
-    }
 
 }

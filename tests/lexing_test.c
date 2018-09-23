@@ -8,9 +8,10 @@ block comment test
 // line comment test
 int main(){
 	char a;
-	a = '\r';
+	a = 'a';
 	a = '\t';
 	char* str1;
+	str1 = "this is string";
 	a = 'xixixixixix';
 	a = 10;
 	int _sum;
