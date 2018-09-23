@@ -50,8 +50,6 @@ public class Token {
         // logical operators
         AND, // "&&"
         OR,  // "||"
-        BIAND, // "&"
-        BIOR, // "|"
 
         // comparisons
         EQ, // "=="

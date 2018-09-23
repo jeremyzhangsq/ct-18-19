@@ -14,7 +14,7 @@ public class Tokeniser {
 
     private Scanner scanner;
     private int error = 0;
-    public final static Map<String,TokenClass> RESERVED= new HashMap<>();
+    private final static Map<String,TokenClass> RESERVED= new HashMap<>();
     static {
         RESERVED.put("int",TokenClass.INT);
         RESERVED.put("char",TokenClass.CHAR);
@@ -79,16 +79,61 @@ public class Tokeniser {
             return new Token(TokenClass.MINUS, line, column);
         else if (c == '*')
             return new Token(TokenClass.ASTERIX, line, column);
-        else if (c == '/')
-            return new Token(TokenClass.DIV, line, column);
         else if (c == '%')
             return new Token(TokenClass.REM, line, column);
-        else if (c == '=')
+        else if (c == '/'){
+            c = scanner.peek();
+            if(c=='/'){
+                while(c!='\r'){
+                    scanner.next();
+                    c = scanner.peek();
+                }
+                scanner.next();
+                return next();
+            }
+            else if(c=='*'){
+                char cnext = c;
+                while(true){
+                    scanner.next();
+                    cnext = scanner.peek();
+                    if(c=='*' && cnext=='/') break;
+                    else c = cnext;
+
+                }
+                scanner.next();
+                return next();
+            }
+            return new Token(TokenClass.DIV, line, column);
+        }
+        else if (c == '='){
+            if(scanner.peek()=='='){
+                scanner.next();
+                return new Token(TokenClass.EQ, line, column);
+            }
             return new Token(TokenClass.ASSIGN, line, column);
-        else if (c == '<')
+        }
+        else if (c == '!'){
+            if(scanner.peek()=='='){
+                scanner.next();
+                return new Token(TokenClass.NE, line, column);
+            }
+        }
+        else if (c == '<'){
+            if(scanner.peek()=='='){
+                scanner.next();
+                return new Token(TokenClass.LE, line, column);
+            }
             return new Token(TokenClass.LT, line, column);
-        else if (c == '>')
+        }
+
+        else if (c == '>'){
+            if(scanner.peek()=='='){
+                scanner.next();
+                return new Token(TokenClass.GE, line, column);
+            }
             return new Token(TokenClass.GT, line, column);
+        }
+
         else if (c == '{')
             return new Token(TokenClass.LBRA, line, column);
         else if (c == '}')
@@ -107,10 +152,18 @@ public class Tokeniser {
             return new Token(TokenClass.COMMA, line, column);
         else if (c == '.')
             return new Token(TokenClass.DOT, line, column);
-        else if (c == '&')
-            return new Token(TokenClass.BIAND, line, column);
-        else if (c == '|')
-            return new Token(TokenClass.BIOR, line, column);
+        else if (c == '&'){
+            if(scanner.peek()=='&'){
+                scanner.next();
+                return new Token(TokenClass.AND, line, column);
+            }
+        }
+        else if (c == '|'){
+            if(scanner.peek()=='&'){
+                scanner.next();
+                return new Token(TokenClass.OR, line, column);
+            }
+        }
         //  recognize #include
         else if (c == '#'){
             StringBuilder sb = new StringBuilder();
@@ -120,8 +173,6 @@ public class Tokeniser {
                 scanner.next();
                 c = scanner.peek();
             }
-            line = scanner.getLine();
-            column = scanner.getColumn();
             if(sb.toString().equals("include"))
                 return new Token(TokenClass.INCLUDE, line, column);
         }
@@ -135,8 +186,6 @@ public class Tokeniser {
                 scanner.next();
                 c = scanner.peek();
             }
-            line = scanner.getLine();
-            column = scanner.getColumn();
             if(RESERVED.containsKey(sb.toString()))
                 return new Token(RESERVED.get(sb.toString()), line, column);
             else
@@ -152,13 +201,11 @@ public class Tokeniser {
                 scanner.next();
                 c = scanner.peek();
             }
-            line = scanner.getLine();
-            column = scanner.getColumn();
             return new Token(TokenClass.INT_LITERAL, sb.toString(), line, column);
         }
         // recognize string_literal and char_literal
         else if(c == '"'|| c== '\''){
-            return getLiteral(c);
+            return getLiteral(c,line,column);
         }
 
         // if we reach this point, it means we did not recognise a valid token
@@ -166,22 +213,26 @@ public class Tokeniser {
         return new Token(TokenClass.INVALID, line, column);
     }
 
-    private Token getLiteral(char ch) throws IOException{
+    private Token getLiteral(char ch, int line, int col) throws IOException{
         StringBuilder sb = new StringBuilder();
         sb.append(ch);
         char c = scanner.peek();
-        while(c != ch){
+        char pre = ' ';
+        while(true){
             sb.append(c);
+            pre = c;
             scanner.next();
             c = scanner.peek();
+            if(c==ch && pre!='\\') break;
+
         }
         sb.append(c);
         scanner.next();
         if(ch == '\'')
-            return new Token(TokenClass.CHAR_LITERAL, sb.toString(), scanner.getLine(), scanner.getColumn());
+            return new Token(TokenClass.CHAR_LITERAL, sb.toString(), line, col);
         else if(ch == '"')
-            return new Token(TokenClass.STRING_LITERAL, sb.toString(), scanner.getLine(), scanner.getColumn());
-        return new Token(TokenClass.INVALID, scanner.getLine(), scanner.getColumn());
+            return new Token(TokenClass.STRING_LITERAL, sb.toString(), line, col);
+        return new Token(TokenClass.INVALID, line, col);
     }
 
 }
