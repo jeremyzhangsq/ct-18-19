@@ -84,7 +84,7 @@ public class Tokeniser {
         else if (c == '/'){
             c = scanner.peek();
             if(c=='/'){
-                while(c!='\r'){
+                while(c!='\n'){
                     scanner.next();
                     c = scanner.peek();
                 }
@@ -98,7 +98,6 @@ public class Tokeniser {
                     cnext = scanner.peek();
                     if(c=='*' && cnext=='/') break;
                     else c = cnext;
-
                 }
                 scanner.next();
                 return next();
