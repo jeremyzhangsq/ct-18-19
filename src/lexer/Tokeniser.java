@@ -176,7 +176,7 @@ public class Tokeniser {
                 return new Token(TokenClass.INCLUDE, line, column);
         }
         //  recognize identifier and keyword
-        else if (Character.isLetter(c)){
+        else if (Character.isLetter(c) || c == '_'){
             StringBuilder sb = new StringBuilder();
             sb.append(c);
             c = scanner.peek();

@@ -13,6 +13,7 @@ int main(){
 	char* str1;
 	a = 'xixixixixix';
 	a = 10;
+	int _sum;
 	str1 = " \"escape double\"";
 	str1 = " \'escape single\'";
 	if(while99>1)
