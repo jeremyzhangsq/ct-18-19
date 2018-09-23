@@ -13,7 +13,6 @@ int main(){
 	char* str1;
 	str1 = "this is string";
 	a = 'xixixixixix';
-	a = 10;
 	int _sum;
 	str1 = " \"escape double\"";
 	str1 = " \'escape single\'";

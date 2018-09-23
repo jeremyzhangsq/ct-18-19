@@ -158,7 +158,7 @@ public class Tokeniser {
             }
         }
         else if (c == '|'){
-            if(scanner.peek()=='&'){
+            if(scanner.peek()=='|'){
                 scanner.next();
                 return new Token(TokenClass.OR, line, column);
             }
@@ -225,13 +225,9 @@ public class Tokeniser {
             c=scanner.peek();
 
             if(c=='\\')
-                for(int i =0;i<2;i++,scanner.next(),c=scanner.peek()) {
-                    sb.append(c);
-                }
+                for(int i =0;i<2;i++,scanner.next(),c=scanner.peek()) sb.append(c);
             else
-                for(int i =0;i<1;i++,c=scanner.peek(),scanner.next(),c=scanner.peek()) {
-                    sb.append(c);
-                }
+                for(int i =0;i<1;i++,c=scanner.peek(),scanner.next(),c=scanner.peek()) sb.append(c);
 
             if(c=='\''){
                 sb.append(c);
