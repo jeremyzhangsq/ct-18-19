@@ -53,7 +53,7 @@ public class Scanner {
 
         if (r == '\n' || r == '\r') {
             line++;
-            column =0;
+            column =1;
         } else {
             column++;
         }
