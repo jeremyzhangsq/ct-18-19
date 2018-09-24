@@ -122,8 +122,11 @@ public class Parser {
     private void parseProgram() {
         parseIncludes();
         parseStructDecls();
-        parseVarDecls();
-        parseFunDecls();
+        Token t = lookAhead(2);
+        if(t.tokenClass.equals(TokenClass.SC)||t.tokenClass.equals(TokenClass.LSBR))
+            parseVarDecls();
+        if(t.tokenClass.equals(TokenClass.LPAR))
+            parseFunDecls();
         expect(TokenClass.EOF);
     }
 
@@ -136,32 +139,45 @@ public class Parser {
         }
     }
 
+    private void parseStructType(){
+        expect(TokenClass.STRUCT);
+        expect(TokenClass.IDENTIFIER);
+    }
+
+    private void parseType(){
+        if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT)) nextToken();
+        else if (accept(TokenClass.STRUCT)) parseStructType();
+        else error(token.tokenClass);
+        if (accept(TokenClass.ASTERIX)){
+            nextToken();
+        }
+    }
+
     private void parseStructDecls() {
         // to be completed ...
         if (accept(TokenClass.STRUCT)){
-            nextToken();
-            expect(TokenClass.IDENTIFIER);
+            parseStructType();
             expect(TokenClass.LBRA);
-            expect(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID);
+            parseType();
             OneVarDecls();
             parseVarDecls();
             expect(TokenClass.RBRA);
             expect(TokenClass.SC);
             parseStructDecls();
         }
+
     }
 
 
     private void parseVarDecls() {
         // to be completed ...
-        if (accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID)){
-            nextToken();
+        if (accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT)){
+            parseType();
             OneVarDecls();
             parseVarDecls();
         }
     }
     private void OneVarDecls() {
-
         try{
             Token ahead = lookAhead(1);
             expect(TokenClass.IDENTIFIER);
@@ -179,8 +195,45 @@ public class Parser {
         }
     }
 
+    private void parseStatement(){
+
+    }
+
+
     private void parseFunDecls() {
         // to be completed ...
+        if (accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT)){
+            parseType();
+            expect(TokenClass.IDENTIFIER);
+            expect(TokenClass.LPAR);
+            parseParameter();
+            expect(TokenClass.RPAR);
+            parseBlock();
+        }
+    }
+
+    private void parseParameter(){
+        if (accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT)) {
+            parseType();
+            expect(TokenClass.IDENTIFIER);
+            parseArgs();
+        }
+    }
+    private void parseArgs(){
+        if (accept(TokenClass.COMMA)){
+            nextToken();
+            parseType();
+            expect(TokenClass.IDENTIFIER);
+            parseArgs();
+        }
+    }
+    private void parseBlock() {
+        if (accept(TokenClass.LBRA)){
+            nextToken();
+            parseVarDecls();
+            parseStatement();
+            expect(TokenClass.RBRA);
+        }
     }
 
     // to be completed ...

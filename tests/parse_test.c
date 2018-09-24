@@ -8,5 +8,5 @@ struct astruct
 
 struct nullstruct
 {
-	
+    int b;
 };
