@@ -104,7 +104,6 @@ public class Parser {
                 return cur;
             }
         }
-
         error(expected);
         return null;
     }
@@ -139,10 +138,45 @@ public class Parser {
 
     private void parseStructDecls() {
         // to be completed ...
+        if (accept(TokenClass.STRUCT)){
+            nextToken();
+            expect(TokenClass.IDENTIFIER);
+            expect(TokenClass.LBRA);
+            expect(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID);
+            OneVarDecls();
+            parseVarDecls();
+            expect(TokenClass.RBRA);
+            expect(TokenClass.SC);
+            parseStructDecls();
+        }
     }
+
 
     private void parseVarDecls() {
         // to be completed ...
+        if (accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID)){
+            nextToken();
+            OneVarDecls();
+            parseVarDecls();
+        }
+    }
+    private void OneVarDecls() {
+
+        try{
+            Token ahead = lookAhead(1);
+            expect(TokenClass.IDENTIFIER);
+            if (ahead.tokenClass.equals(TokenClass.LSBR)){
+                nextToken();
+                expect(TokenClass.INT_LITERAL);
+                expect(TokenClass.RSBR);
+                expect(TokenClass.SC);
+            }
+            else if (ahead.tokenClass.equals(TokenClass.SC)) expect(TokenClass.SC);
+            else error(ahead.tokenClass);
+        }
+        catch (NullPointerException e){
+            e.printStackTrace();
+        }
     }
 
     private void parseFunDecls() {
@@ -150,4 +184,5 @@ public class Parser {
     }
 
     // to be completed ...
+
 }
