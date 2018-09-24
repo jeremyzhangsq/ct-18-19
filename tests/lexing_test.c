@@ -12,7 +12,7 @@ int main(){
 	a = '\t';
 	char* str1;
 	str1 = "this is string";
-	a = 'xixixixixix';
+	a = "\txixix\ixixix";
 	int _sum;
 	str1 = " \"escape double\"";
 	str1 = " \'escape single\'";

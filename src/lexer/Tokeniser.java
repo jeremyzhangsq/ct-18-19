@@ -14,6 +14,8 @@ public class Tokeniser {
 
     private Scanner scanner;
     private int error = 0;
+    private final static Character[] ESCAPE = {'t','b','n','r','f','\'','\"'};
+    private final static Set<Character> ESCAPE_SET = new HashSet<Character>(Arrays.asList(ESCAPE));
     private final static Map<String,TokenClass> RESERVED= new HashMap<>();
     static {
         RESERVED.put("int",TokenClass.INT);
@@ -204,6 +206,7 @@ public class Tokeniser {
         }
         // recognize string_literal and char_literal
         else if(c == '"'){
+            boolean error_code = false;
             StringBuilder sb = new StringBuilder();
             sb.append(c);
             c = scanner.peek();
@@ -213,11 +216,14 @@ public class Tokeniser {
                 pre = c;
                 scanner.next();
                 c = scanner.peek();
+                if(pre == '\\' && !ESCAPE_SET.contains(c)){
+                    error_code = true;
+                }
                 if(c=='"' && pre!='\\') break;
             }
             sb.append(c);
             scanner.next();
-            return new Token(TokenClass.STRING_LITERAL, sb.toString(), line, column);
+            if(!error_code) return new Token(TokenClass.STRING_LITERAL, sb.toString(), line, column);
         }
         else if(c == '\''){
             StringBuilder sb = new StringBuilder();
