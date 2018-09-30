@@ -40,10 +40,10 @@ exp        ::= "(" exp ")"
              | arrayaccess | fieldaccess | valueat | funcall | sizeof | typecast
 
 funcall      ::= IDENT "(" [ exp ("," exp)* ] ")"
-arrayaccess  ::= exp "[" exp "]"                  # array access
-fieldaccess  ::= exp "." IDENT                    # structure field member access
 valueat      ::= "*" exp                          # Value at operator (pointer indirection)
 sizeof       ::= "sizeof" "(" type ")"            # size of type
 typecast     ::= "(" type ")" exp                 # type casting
+arrayaccess  ::= exp "[" exp "]"                  # array access
+fieldaccess  ::= exp "." IDENT                    # structure field member access
 
 

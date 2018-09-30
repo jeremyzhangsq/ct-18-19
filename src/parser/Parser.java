@@ -123,10 +123,12 @@ public class Parser {
         parseIncludes();
         parseStructDecls();
         Token t = lookAhead(2);
-        if(t.tokenClass.equals(TokenClass.SC)||t.tokenClass.equals(TokenClass.LSBR))
-            parseVarDecls();
-        if(t.tokenClass.equals(TokenClass.LPAR))
-            parseFunDecls();
+        while (!accept(TokenClass.EOF)){
+            if(t.tokenClass.equals(TokenClass.SC)||t.tokenClass.equals(TokenClass.LSBR))
+                parseVarDecls();
+            if(t.tokenClass.equals(TokenClass.LPAR))
+                parseFunDecls();
+        }
         expect(TokenClass.EOF);
     }
 
@@ -145,7 +147,7 @@ public class Parser {
     }
 
     private void parseType(){
-        if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT)) nextToken();
+        if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID)) nextToken();
         else if (accept(TokenClass.STRUCT)) parseStructType();
         else error(token.tokenClass);
         if (accept(TokenClass.ASTERIX)){
@@ -174,7 +176,6 @@ public class Parser {
         if (accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT)){
             parseType();
             OneVarDecls();
-            parseVarDecls();
         }
     }
     private void OneVarDecls() {
@@ -196,9 +197,124 @@ public class Parser {
     }
 
     private void parseStatement(){
+        if (!accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT)){
+            if(accept(TokenClass.LBRA)){
+                parseBlock();
+            }
+            else if (accept(TokenClass.WHILE, TokenClass.IF)){
+                TokenClass cur = expect(TokenClass.WHILE, TokenClass.IF).tokenClass;
+                expect(TokenClass.LPAR);
+                parseExp();
+                expect(TokenClass.RPAR);
+                parseStatement();
+                if (cur.equals(TokenClass.IF) && accept(TokenClass.ELSE)){
+                    nextToken();
+                    parseStatement();
+                }
+            }
+
+            else if (accept(TokenClass.RETURN)){
+                nextToken();
+                if (accept(TokenClass.SC)){
+                    nextToken();
+                }
+                else {
+                    parseExp();
+                    expect(TokenClass.SC);
+                }
+            }
+            else {
+                parseExp();
+                if (accept(TokenClass.ASSIGN)){
+                    nextToken();
+                    parseExp();
+                    expect(TokenClass.SC);
+                }
+                else if (accept(TokenClass.SC)) nextToken();
+            }
+        }
+    }
+
+    private void parseExp(){
+        Token ahead;
+        if(accept(TokenClass.LPAR)){
+            nextToken();
+            if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT)){
+                parseType();
+                expect(TokenClass.RPAR);
+                parseExp();
+            }
+            else {
+                parseExp();
+                expect(TokenClass.RPAR);
+            }
+
+        }
+        else if(accept(TokenClass.CHAR_LITERAL,TokenClass.STRING_LITERAL,TokenClass.INT_LITERAL)) nextToken();
+        else if(accept(TokenClass.IDENTIFIER)) {
+            ahead = lookAhead(1);
+            if(ahead.tokenClass.equals(TokenClass.LPAR)){
+                parseFunCall();;
+            }
+            else nextToken();
+        }
+        else if (accept(TokenClass.SIZEOF)){
+            nextToken();
+            expect(TokenClass.LPAR);
+            parseType();
+            expect(TokenClass.RPAR);
+        }
+        else if (accept(TokenClass.MINUS,TokenClass.ASTERIX)){
+            nextToken();
+            parseExp();
+        }
+
+
+        if(accept(TokenClass.PLUS,TokenClass.DIV,TokenClass.MINUS,
+                TokenClass.ASTERIX,TokenClass.GT,TokenClass.GE,TokenClass.LE,
+                TokenClass.LT,TokenClass.NE,TokenClass.EQ,TokenClass.OR,TokenClass.AND,TokenClass.REM)){
+            nextToken();
+            parseExp();
+        }
+        else if (accept(TokenClass.LSBR)){
+            nextToken();
+            parseExp();
+            expect(TokenClass.RSBR);
+        }
+        else if (accept(TokenClass.DOT)){
+            nextToken();
+            expect(TokenClass.IDENTIFIER);
+        }
 
     }
 
+
+    private void parseArrayaccess(){
+
+    }
+
+    private void parseDotaccess(){
+
+    }
+
+    private void parseFunCall(){
+        expect(TokenClass.IDENTIFIER);
+        expect(TokenClass.LPAR);
+        if (!accept(TokenClass.RPAR)){
+            parseExp();
+            parseArgRep();
+        }
+        expect(TokenClass.RPAR);
+
+    }
+
+    private void parseArgRep(){
+        if (accept(TokenClass.COMMA)){
+            nextToken();
+            parseExp();
+            parseArgRep();
+        }
+    }
 
     private void parseFunDecls() {
         // to be completed ...
@@ -230,8 +346,10 @@ public class Parser {
     private void parseBlock() {
         if (accept(TokenClass.LBRA)){
             nextToken();
-            parseVarDecls();
-            parseStatement();
+            while (!accept(TokenClass.RBRA)){
+                parseVarDecls();
+                parseStatement();
+            }
             expect(TokenClass.RBRA);
         }
     }

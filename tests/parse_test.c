@@ -10,3 +10,7 @@ struct nullstruct
 {
     int b;
 };
+
+void fun1(int a, int b){
+    fun2();
+}

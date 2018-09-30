@@ -14,7 +14,7 @@ public class Tokeniser {
 
     private Scanner scanner;
     private int error = 0;
-    private final static Character[] ESCAPE = {'t','b','n','r','f','\'','\"'};
+    private final static Character[] ESCAPE = {'t','b','n','r','f','\'','\"', '0'};
     private final static Set<Character> ESCAPE_SET = new HashSet<Character>(Arrays.asList(ESCAPE));
     private final static Map<String,TokenClass> RESERVED= new HashMap<>();
     static {
