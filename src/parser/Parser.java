@@ -126,7 +126,7 @@ public class Parser {
         while (!accept(TokenClass.EOF)){
             if(t.tokenClass.equals(TokenClass.SC)||t.tokenClass.equals(TokenClass.LSBR))
                 parseVarDecls();
-            if(t.tokenClass.equals(TokenClass.LPAR))
+            else if(t.tokenClass.equals(TokenClass.LPAR))
                 parseFunDecls();
         }
         expect(TokenClass.EOF);
