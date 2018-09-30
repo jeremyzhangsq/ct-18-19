@@ -227,15 +227,23 @@ public class Tokeniser {
         }
         else if(c == '\''){
             StringBuilder sb = new StringBuilder();
+            boolean error = false;
             sb.append(c);
             c=scanner.peek();
+            sb.append(c);
+            scanner.next();
 
-            if(c=='\\')
-                for(int i =0;i<2;i++,scanner.next(),c=scanner.peek()) sb.append(c);
-            else
-                for(int i =0;i<1;i++,c=scanner.peek(),scanner.next(),c=scanner.peek()) sb.append(c);
+            if(c=='\\'){
+                c=scanner.peek();
+                if (ESCAPE_SET.contains(c)){
+                    sb.append(c);
+                }
+                else error = true;
+                scanner.next();
+            }
 
-            if(c=='\''){
+            c = scanner.peek();
+            if(c=='\'' && !error){
                 sb.append(c);
                 scanner.next();
                 return new Token(TokenClass.CHAR_LITERAL, sb.toString(), line, column);

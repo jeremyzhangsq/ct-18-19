@@ -8,11 +8,10 @@ block comment test
 // line comment test
 int main(){
 	char a;
-	a = 'a';
-	a = '\t';
+	a = '0';
 	char* str1;
 	str1 = "this is string";
-	a = "\txixix\ixixix";
+	a = "\0ixixixix";
 	int _sum;
 	str1 = " \"escape double\"";
 	str1 = " \'escape single\'";
