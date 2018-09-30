@@ -122,8 +122,8 @@ public class Parser {
     private void parseProgram() {
         parseIncludes();
         parseStructDecls();
-        Token t = lookAhead(2);
         while (!accept(TokenClass.EOF)){
+            Token t = lookAhead(2);
             if(t.tokenClass.equals(TokenClass.SC)||t.tokenClass.equals(TokenClass.LSBR))
                 parseVarDecls();
             else if(t.tokenClass.equals(TokenClass.LPAR))
