@@ -1,14 +1,14 @@
-/*
-block comment test
-// nest one
-
-/* nest two */
-*/
+///*
+//block comment test
+//// nest one
+//
+///* nest two */
+//*/
 
 // line comment test
 int main(){
 	char a;
-	a = '0';
+	a = '\t';
 	char* str1;
 	str1 = "this is string";
 	a = "\0ixixixix";
