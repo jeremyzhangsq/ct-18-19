@@ -118,24 +118,26 @@ public class Parser {
         return result;
     }
 
-
     private void parseProgram() {
 
 
         while (!accept(TokenClass.EOF)){
-            Token t = lookAhead(2);
             if (accept(TokenClass.INCLUDE))
                 parseIncludes();
-            else if (accept(TokenClass.STRUCT))
-                parseStructDecls();
-            else if (t.tokenClass.equals(TokenClass.SC)||t.tokenClass.equals(TokenClass.LSBR))
-                parseVarDecls();
-            else if (t.tokenClass.equals(TokenClass.LPAR))
-                parseFunDecls();
             else {
-                error(token.tokenClass);
-                nextToken();
-                return;
+                parseType();
+                Token t = lookAhead(1);
+                if (accept(TokenClass.LBRA))
+                    parseStructDecls();
+                else if (t.tokenClass.equals(TokenClass.SC)||t.tokenClass.equals(TokenClass.LSBR))
+                    OneVarDecls();
+                else if (t.tokenClass.equals(TokenClass.LPAR))
+                    parseFunDecls();
+                else {
+                    error(token.tokenClass);
+                    nextToken();
+                    return;
+                }
             }
         }
         expect(TokenClass.EOF);
@@ -173,25 +175,18 @@ public class Parser {
 
     private void parseStructDecls() {
         // to be completed ...
-
-        parseStructType();
         expect(TokenClass.LBRA);
         parseType();
         OneVarDecls();
-        parseVarDecls();
+        while (!accept(TokenClass.RBRA)){
+            parseType();
+            OneVarDecls();
+        }
         expect(TokenClass.RBRA);
         expect(TokenClass.SC);
 
     }
 
-
-    private void parseVarDecls() {
-        // to be completed ...
-        if (accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT)){
-            parseType();
-            OneVarDecls();
-        }
-    }
     private void OneVarDecls() {
         try{
             Token ahead = lookAhead(1);
@@ -343,14 +338,12 @@ public class Parser {
 
     private void parseFunDecls() {
         // to be completed ...
-        if (accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT)){
-            parseType();
-            expect(TokenClass.IDENTIFIER);
-            expect(TokenClass.LPAR);
-            parseParameter();
-            expect(TokenClass.RPAR);
-            parseBlock();
-        }
+        expect(TokenClass.IDENTIFIER);
+        expect(TokenClass.LPAR);
+        parseParameter();
+        expect(TokenClass.RPAR);
+        parseBlock();
+
     }
 
     private void parseParameter(){
@@ -374,7 +367,10 @@ public class Parser {
             while (!accept(TokenClass.RBRA)){
                 if((lookAhead(1).tokenClass.equals(TokenClass.IDENTIFIER) && lookAhead(2).tokenClass.equals(TokenClass.SC))
                         ||(lookAhead(2).tokenClass.equals(TokenClass.LSBR) && lookAhead(5).tokenClass.equals(TokenClass.SC)))
-                    parseVarDecls();
+                {
+                    parseType();
+                    OneVarDecls();
+                }
                 else parseStatement();
             }
             expect(TokenClass.RBRA);
