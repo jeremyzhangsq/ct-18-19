@@ -1,5 +1,6 @@
 package parser;
 
+import com.sun.xml.internal.bind.v2.TODO;
 import lexer.Token;
 import lexer.Tokeniser;
 import lexer.Token.TokenClass;
@@ -119,8 +120,6 @@ public class Parser {
     }
 
     private void parseProgram() {
-
-
         while (!accept(TokenClass.EOF)){
             if (accept(TokenClass.INCLUDE))
                 parseIncludes();
@@ -129,9 +128,9 @@ public class Parser {
                 Token t = lookAhead(1);
                 if (accept(TokenClass.LBRA))
                     parseStructDecls();
-                else if (t.tokenClass.equals(TokenClass.SC)||t.tokenClass.equals(TokenClass.LSBR))
+                else if (accept(TokenClass.IDENTIFIER) && (t.tokenClass.equals(TokenClass.SC)||t.tokenClass.equals(TokenClass.LSBR)))
                     OneVarDecls();
-                else if (t.tokenClass.equals(TokenClass.LPAR))
+                else if (accept(TokenClass.IDENTIFIER) && t.tokenClass.equals(TokenClass.LPAR))
                     parseFunDecls();
                 else {
                     error(token.tokenClass);
@@ -188,7 +187,6 @@ public class Parser {
     }
 
     private void OneVarDecls() {
-        try{
             Token ahead = lookAhead(1);
             expect(TokenClass.IDENTIFIER);
             if (ahead.tokenClass.equals(TokenClass.LSBR)){
@@ -199,22 +197,16 @@ public class Parser {
             }
             else if (ahead.tokenClass.equals(TokenClass.SC)) nextToken();
             else {
-                error(ahead.tokenClass);
-                while (!accept(TokenClass.SC))
-                    nextToken();
-                nextToken();
+                errorNewline();
                 return;
             }
-        }
-        catch (NullPointerException e){
-            e.printStackTrace();
-        }
     }
 
     private void parseStatement(){
         if(accept(TokenClass.LBRA)){
             parseBlock();
         }
+        // TODO: check
         else if (accept(TokenClass.WHILE, TokenClass.IF)){
             TokenClass cur = expect(TokenClass.WHILE, TokenClass.IF).tokenClass;
             expect(TokenClass.LPAR);
@@ -237,6 +229,8 @@ public class Parser {
                 expect(TokenClass.SC);
             }
         }
+        //TODO: check
+        //exp "=" exp ";"   |    exp ";"
         else {
             if (!lookAhead(1).tokenClass.equals(TokenClass.SC) && !lookAhead(2).tokenClass.equals(TokenClass.SC)){
                 parseExp();
@@ -296,7 +290,6 @@ public class Parser {
             errorNewline();
             return;
         }
-
 
         if(accept(TokenClass.PLUS,TokenClass.DIV,TokenClass.MINUS,
                 TokenClass.ASTERIX,TokenClass.GT,TokenClass.GE,TokenClass.LE,
@@ -361,6 +354,8 @@ public class Parser {
             parseArgs();
         }
     }
+
+    // TODO: check
     private void parseBlock() {
         if (accept(TokenClass.LBRA)){
             nextToken();
