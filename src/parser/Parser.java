@@ -228,25 +228,23 @@ public class Parser {
                 expect(TokenClass.SC);
             }
         }
-        //TODO: check
         //exp "=" exp ";"   |    exp ";"
         else {
-            if (!lookAhead(1).tokenClass.equals(TokenClass.SC) && !lookAhead(2).tokenClass.equals(TokenClass.SC)){
+            if(accept(TokenClass.IDENTIFIER) && lookAhead(1).tokenClass.equals(TokenClass.LPAR)){
+                parseFunCall();
+                expect(TokenClass.SC);
+            }
+            else {
                 parseExp();
                 if (accept(TokenClass.ASSIGN)){
                     nextToken();
                     parseExp();
                     expect(TokenClass.SC);
                 }
-                else if (accept(TokenClass.SC)) nextToken();
                 else {
                     errorNewline();
                 }
             }
-            else {
-                errorNewline();
-            }
-
         }
     }
 

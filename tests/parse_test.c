@@ -27,12 +27,12 @@ struct nullstruct
 };
 
 // function declare
-void func(){
-    print("func");
-}
-void func1(void a, void * b, int c, char d, struct account c, struct account * d){
-    print("func1");
-}
+//void func(){
+//    print("func");
+//}
+//void func1(void a, void * b, int c, char d, struct account c, struct account * d){
+//    print("func1");
+//}
 
 //void func1(void a,){
 //    print("func1");
@@ -49,9 +49,9 @@ void fun1(int a, int b){
 
     while (((5>3)||(a[10]!=1)))
     {
-        x   = x /10;
+        x = x /10;
         n = 0;
-
+        a();
         if (x<1){
             c = '\\';
             d = (int*) 10;
