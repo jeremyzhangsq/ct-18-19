@@ -362,13 +362,13 @@ public class Parser {
         if (accept(TokenClass.LBRA)){
             nextToken();
             while (!accept(TokenClass.RBRA)){
-                if((lookAhead(1).tokenClass.equals(TokenClass.IDENTIFIER) && lookAhead(2).tokenClass.equals(TokenClass.SC))
-                        ||(lookAhead(2).tokenClass.equals(TokenClass.LSBR) && lookAhead(5).tokenClass.equals(TokenClass.SC)))
+                if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT))
                 {
                     parseType();
                     OneVarDecls();
                 }
-                else parseStatement();
+                else
+                    parseStatement();
             }
             expect(TokenClass.RBRA);
         }

@@ -46,9 +46,10 @@ char sum [10];
 void fun1(int a, int b){
 //    sum = 0;
 //    a.account_number = 1;
-
+    int c;
     while (((5>3)||(a[10]!=1)))
     {
+        int b;
         x = x /10;
         n = 0;
         a();
