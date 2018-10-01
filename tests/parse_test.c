@@ -1,11 +1,11 @@
 #include "minic-stdlib.h"
 
-/*
-block comment test
-// nest one
-
-/* nest two */
-
+///** /**
+//block comment test
+//// nest one
+//
+///** nest two **/
+//**/
 // invalid type
 //string a(){
 //}
@@ -47,12 +47,12 @@ void fun1(int a, int b){
 //    sum = 0;
 //    a.account_number = 1;
 
-    while ((x-y) < func() )
+    while (((5>3)||(a[10]!=1)))
     {
         x   = x /10;
         n = 0;
 
-        if (x<){
+        if (x<1){
             c = '\\';
             d = (int*) 10;
         } else fun1();

@@ -198,7 +198,6 @@ public class Parser {
             else if (ahead.tokenClass.equals(TokenClass.SC)) nextToken();
             else {
                 errorNewline();
-                return;
             }
     }
 
@@ -242,12 +241,10 @@ public class Parser {
                 else if (accept(TokenClass.SC)) nextToken();
                 else {
                     errorNewline();
-                    return;
                 }
             }
             else {
                 errorNewline();
-                return;
             }
 
         }
@@ -291,24 +288,31 @@ public class Parser {
             return;
         }
 
-        if(accept(TokenClass.PLUS,TokenClass.DIV,TokenClass.MINUS,
-                TokenClass.ASTERIX,TokenClass.GT,TokenClass.GE,TokenClass.LE,
-                TokenClass.LT,TokenClass.NE,TokenClass.EQ,TokenClass.OR,TokenClass.AND,TokenClass.REM)){
-            nextToken();
-            parseExp();
-        }
-        else if (accept(TokenClass.LSBR)){
-            nextToken();
-            parseExp();
-            expect(TokenClass.RSBR);
-        }
-        else if (accept(TokenClass.DOT)){
-            nextToken();
-            expect(TokenClass.IDENTIFIER);
-        }
+        parseExprStar();
 
     }
 
+    private void parseExprStar(){
+        if(accept(TokenClass.PLUS,TokenClass.DIV,TokenClass.MINUS,
+                TokenClass.ASTERIX,TokenClass.GT,TokenClass.GE,TokenClass.LE,
+                TokenClass.LT,TokenClass.NE,TokenClass.EQ,TokenClass.OR,
+                TokenClass.AND,TokenClass.REM,TokenClass.LSBR,TokenClass.DOT )){
+            if (accept(TokenClass.LSBR)){
+                nextToken();
+                parseExp();
+                expect(TokenClass.RSBR);
+            }
+            else if (accept(TokenClass.DOT)){
+                nextToken();
+                expect(TokenClass.IDENTIFIER);
+            }
+            else{
+                nextToken();
+                parseExp();
+            }
+            parseExprStar();
+        }
+    }
 
     private void parseFunCall(){
         expect(TokenClass.IDENTIFIER);

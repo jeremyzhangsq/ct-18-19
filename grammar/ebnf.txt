@@ -32,12 +32,16 @@ stmt       ::= block
 block      ::= "{" (vardecl)* (stmt)* "}"
 
 exp        ::= "(" exp ")"
-             | (IDENT | INT_LITERAL)
+             | typecast
              | "-" exp
+             | valueat
+             | funcall
+             | sizeof
+             | (IDENT | INT_LITERAL)
              | CHAR_LITERAL
              | STRING_LITERAL
              | exp (">" | "<" | ">=" | "<=" | "!=" | "==" | "+" | "-" | "/" | "*" | "%" | "||" | "&&") exp  # binary operators
-             | arrayaccess | fieldaccess | valueat | funcall | sizeof | typecast
+             | arrayaccess | fieldaccess
 
 funcall      ::= IDENT "(" [ exp ("," exp)* ] ")"
 valueat      ::= "*" exp                          # Value at operator (pointer indirection)
