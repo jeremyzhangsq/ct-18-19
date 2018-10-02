@@ -199,7 +199,6 @@ public class Parser {
         if(accept(TokenClass.LBRA)){
             parseBlock();
         }
-        // TODO: check
         else if (accept(TokenClass.WHILE, TokenClass.IF)){
             TokenClass cur = expect(TokenClass.WHILE, TokenClass.IF).tokenClass;
             expect(TokenClass.LPAR);
