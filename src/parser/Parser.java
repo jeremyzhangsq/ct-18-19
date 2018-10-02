@@ -181,17 +181,25 @@ public class Parser {
 
     private void OneVarDecls() {
             Token ahead = lookAhead(1);
-            expect(TokenClass.IDENTIFIER);
-            if (ahead.tokenClass.equals(TokenClass.LSBR)){
+            if(accept(TokenClass.IDENTIFIER)){
                 nextToken();
-                expect(TokenClass.INT_LITERAL);
-                expect(TokenClass.RSBR);
-                expect(TokenClass.SC);
+                if (ahead.tokenClass.equals(TokenClass.LSBR)){
+                    nextToken();
+                    expect(TokenClass.INT_LITERAL);
+                    expect(TokenClass.RSBR);
+                    expect(TokenClass.SC);
+                }
+                else if (ahead.tokenClass.equals(TokenClass.SC)) nextToken();
+                else {
+                    error(token.tokenClass);
+                    nextToken();
+                }
             }
-            else if (ahead.tokenClass.equals(TokenClass.SC)) nextToken();
             else {
                 error(token.tokenClass);
+                nextToken();
             }
+
     }
 
     private void parseStatement(){
@@ -235,6 +243,7 @@ public class Parser {
                 }
                 else {
                     error(token.tokenClass);
+                    nextToken();
                 }
             }
         }
@@ -275,6 +284,7 @@ public class Parser {
         }
         else {
             error(token.tokenClass);
+            nextToken();
             return;
         }
 
@@ -349,7 +359,7 @@ public class Parser {
         }
     }
 
-    // TODO: check
+
     private void parseBlock() {
         if (accept(TokenClass.LBRA)){
             nextToken();

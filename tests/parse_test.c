@@ -17,6 +17,7 @@
 //main(){
 //
 //}
+int char;
 struct account {
    int account_number;
    char * first_name;
@@ -49,7 +50,6 @@ char sum [10];
 void fun1(int a, int b){
 //    sum = 0;
 //    a.account_number = 1;
-    int c;
     while (i < n)
         i = i + 1;
     while (((5>3)||(a[10]!=1)))
