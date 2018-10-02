@@ -13,7 +13,10 @@
 //char sum [10);
 //void lyth aa;
 
-
+//// just main
+//main(){
+//
+//}
 struct account {
    int account_number;
    char * first_name;
@@ -47,9 +50,13 @@ void fun1(int a, int b){
 //    sum = 0;
 //    a.account_number = 1;
     int c;
+    while (i < n)
+        i = i + 1;
     while (((5>3)||(a[10]!=1)))
     {
         int b;
+        struct account a;
+        a.account_number = 10;
         x = x /10;
         n = 0;
         a();

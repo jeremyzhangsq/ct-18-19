@@ -157,7 +157,7 @@ public class Parser {
         if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID)) nextToken();
         else if (accept(TokenClass.STRUCT)) parseStructType();
         else {
-            errorNewline();
+            error(token.tokenClass);
             return;
         }
         if (accept(TokenClass.ASTERIX)){
@@ -165,12 +165,6 @@ public class Parser {
         }
     }
 
-    private void errorNewline() {
-        error(token.tokenClass);
-        while (!accept(TokenClass.SC))
-            nextToken();
-        nextToken();
-    }
 
     private void parseStructDecls() {
         // to be completed ...
@@ -197,7 +191,7 @@ public class Parser {
             }
             else if (ahead.tokenClass.equals(TokenClass.SC)) nextToken();
             else {
-                errorNewline();
+                error(token.tokenClass);
             }
     }
 
@@ -242,7 +236,7 @@ public class Parser {
                     expect(TokenClass.SC);
                 }
                 else {
-                    errorNewline();
+                    error(token.tokenClass);
                 }
             }
         }
@@ -282,7 +276,7 @@ public class Parser {
             parseExp();
         }
         else {
-            errorNewline();
+            error(token.tokenClass);
             return;
         }
 
