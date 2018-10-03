@@ -1,5 +1,6 @@
 #include "minic-stdlib.h"
 
+
 ///** /**
 //block comment test
 //// nest one
@@ -27,31 +28,43 @@ struct account {
 
 struct nullstruct
 {
+    int a;
     int b;
-};
-
+}
+//
 // function declare
-//void func(){
-//    print("func");
-//}
-//void func1(void a, void * b, int c, char d, struct account c, struct account * d){
-//    print("func1");
-//}
+void func(){
+    print("func");
+}
+void func1(void a, void * b, int c, char d, struct account c, struct account * d){
+    print("func1");
+}
 
-//void func1(void a,){
-//    print("func1");
-//}
+void func1(void a,){
+    print("func1");
+}
 
-//int a;
+int a;
 int b;
 int sum;
 struct account * a;
 char sum [10];
-void fun1(int a, int b){
-//    sum = 0;
-//    a.account_number = 1;
 
-//    (int) a;
+//// empty condition
+//int main(){
+//    while(){
+//        if(a){
+//                int a;
+//            }
+//    }
+//
+//    return 0;
+//}
+void fun1(int a, int b){
+    sum = 0;
+    a.account_number = 1;
+
+    (int) a;
     c = (char*) b;
 //    d = (void[]) a;
     a = (struct account) b;
@@ -60,7 +73,7 @@ void fun1(int a, int b){
     d = (struct account*) ("a"<"d");
     while (((5>3)||(a[10]!=1)))
     {
-        int b;
+        void b;
         struct account a;
         a.account_number = 10;
         x = x /10;
@@ -71,8 +84,9 @@ void fun1(int a, int b){
             c = '\\';
             d = (int*) 10;
         }
+        // only else
         else {
-        fun1();
+            fun1();
             while ((fun1()+2)/2>(int) 2)
                 i = i + 1;
         }
@@ -85,5 +99,9 @@ void fun1(int a, int b){
         c = '\\';
         d = (int*) 10;
     } else fun1();
+//    // exp as stmt
+//   func1()
+//   a < b
+//   sizeof(int)
 
 }

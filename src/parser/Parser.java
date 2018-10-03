@@ -133,7 +133,6 @@ public class Parser {
                     parseFunDecls();
                 else {
                     error(token.tokenClass);
-                    nextToken();
                     return;
                 }
             }
@@ -157,6 +156,7 @@ public class Parser {
         else if (accept(TokenClass.STRUCT)) parseStructType();
         else {
             error(token.tokenClass);
+            nextToken();
             return;
         }
         if (accept(TokenClass.ASTERIX)){
@@ -192,12 +192,12 @@ public class Parser {
                 else if (ahead.tokenClass.equals(TokenClass.SC)) nextToken();
                 else {
                     error(token.tokenClass);
-                    nextToken();
+                    if (!accept(TokenClass.RBRA)) nextToken();
                 }
             }
             else {
                 error(token.tokenClass);
-                nextToken();
+                if (!accept(TokenClass.RBRA)) nextToken();
             }
 
     }
@@ -243,7 +243,7 @@ public class Parser {
                 }
                 else {
                     error(token.tokenClass);
-                    nextToken();
+                    if(!accept(TokenClass.RBRA)) nextToken();
                 }
             }
         }
@@ -363,7 +363,7 @@ public class Parser {
     private void parseBlock() {
         if (accept(TokenClass.LBRA)){
             nextToken();
-            while (!accept(TokenClass.RBRA)){
+            while (!accept(TokenClass.RBRA,TokenClass.EOF)){
                 if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT))
                 {
                     parseType();
