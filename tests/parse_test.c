@@ -31,7 +31,9 @@ struct bstruct
 {
     int a;
     int b;
-}
+    struct cstruct a[10];
+};
+
 struct account {
    int account_number;
    char * first_name;
