@@ -182,15 +182,22 @@ public class Tokeniser {
             StringBuilder sb = new StringBuilder();
             sb.append(c);
             c = scanner.peek();
-            while(Character.isLetterOrDigit(c) || c == '_'){
-                sb.append(c);
-                scanner.next();
-                c = scanner.peek();
+            try{
+                while(Character.isLetterOrDigit(c) || c == '_'){
+                    sb.append(c);
+                    scanner.next();
+                    c = scanner.peek();
+                }
             }
-            if(RESERVED.containsKey(sb.toString()))
-                return new Token(RESERVED.get(sb.toString()), line, column);
-            else
-                return new Token(TokenClass.IDENTIFIER, sb.toString(), line, column);
+            catch (EOFException e){
+            }
+            finally {
+                if(RESERVED.containsKey(sb.toString()))
+                    return new Token(RESERVED.get(sb.toString()), line, column);
+                else
+                    return new Token(TokenClass.IDENTIFIER, sb.toString(), line, column);
+            }
+
         }
         // recognize number
         else if (Character.isDigit(c)){

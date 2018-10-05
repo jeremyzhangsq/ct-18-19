@@ -1,7 +1,7 @@
 
 int sum;
 char* c;
-struct account *;
+struct account * d;
 void fun1(struct account a, int b){
    sum = 0;
    a.account_number = 1;
