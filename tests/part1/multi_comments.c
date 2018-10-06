@@ -1,0 +1,7 @@
+
+/*
+valid multi
+*/
+
+/*
+invalid multi

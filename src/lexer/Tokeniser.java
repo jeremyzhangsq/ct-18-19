@@ -95,20 +95,23 @@ public class Tokeniser {
             }
             else if(c=='*'){
                 char cnext = c;
-                try{
-                    while(true){
+
+                while(true){
+                    try{
                         scanner.next();
                         cnext = scanner.peek();
                         if(c=='*' && cnext=='/') break;
                         else c = cnext;
                     }
-                    scanner.next();
-                    return next();
+                    catch (EOFException e){
+                        error(c,line,column);
+                        return new Token(TokenClass.INVALID, line, column);
+                    }
                 }
-                catch (EOFException e){
-                    error(c, line, column);
-                    return new Token(TokenClass.INVALID, line, column);
-                }
+                scanner.next();
+                return next();
+
+
             }
             return new Token(TokenClass.DIV, line, column);
         }
