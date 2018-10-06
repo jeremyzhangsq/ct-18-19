@@ -95,14 +95,20 @@ public class Tokeniser {
             }
             else if(c=='*'){
                 char cnext = c;
-                while(true){
+                try{
+                    while(true){
+                        scanner.next();
+                        cnext = scanner.peek();
+                        if(c=='*' && cnext=='/') break;
+                        else c = cnext;
+                    }
                     scanner.next();
-                    cnext = scanner.peek();
-                    if(c=='*' && cnext=='/') break;
-                    else c = cnext;
+                    return next();
                 }
-                scanner.next();
-                return next();
+                catch (EOFException e){
+                    error(c, line, column);
+                    return new Token(TokenClass.INVALID, line, column);
+                }
             }
             return new Token(TokenClass.DIV, line, column);
         }
@@ -217,6 +223,11 @@ public class Tokeniser {
             StringBuilder sb = new StringBuilder();
             sb.append(c);
             c = scanner.peek();
+            if (c=='"'){
+                sb.append(c);
+                scanner.next();
+                return new Token(TokenClass.STRING_LITERAL, sb.toString(), line, column);
+            }
             char pre = ' ';
             while(true){
                 sb.append(c);

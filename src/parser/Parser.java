@@ -156,7 +156,7 @@ public class Parser {
         else if (accept(TokenClass.STRUCT)) parseStructType();
         else {
             error(token.tokenClass);
-            nextToken();
+            if (!accept(TokenClass.RBRA))nextToken();
             return;
         }
         if (accept(TokenClass.ASTERIX)){
