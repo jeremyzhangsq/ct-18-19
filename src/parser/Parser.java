@@ -230,23 +230,26 @@ public class Parser {
         }
         //exp "=" exp ";"   |    exp ";"
         else {
-            if(accept(TokenClass.IDENTIFIER) && lookAhead(1).tokenClass.equals(TokenClass.LPAR)){
-                parseFunCall();
-                expect(TokenClass.SC);
-            }
-            else {
+//            if(accept(TokenClass.IDENTIFIER) && lookAhead(1).tokenClass.equals(TokenClass.LPAR)){
+//                parseFunCall();
+//                expect(TokenClass.SC);
+//            }
+//            else {
                 parseExp();
                 if (accept(TokenClass.ASSIGN)){
                     nextToken();
                     parseExp();
                     expect(TokenClass.SC);
                 }
+                else if(accept(TokenClass.SC)){
+                    nextToken();
+                }
                 else {
                     error(token.tokenClass);
                     if(!accept(TokenClass.RBRA)) nextToken();
                 }
             }
-        }
+//        }
     }
 
 
