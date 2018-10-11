@@ -1,10 +1,13 @@
 package parser;
 
+import ast.*;
+
 import lexer.Token;
 import lexer.Tokeniser;
 import lexer.Token.TokenClass;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 
@@ -26,11 +29,11 @@ public class Parser {
         this.tokeniser = tokeniser;
     }
 
-    public void parse() {
+    public Program parse() {
         // get the first token
         nextToken();
 
-        parseProgram();
+        return parseProgram();
     }
 
     public int getErrorCount() {
@@ -118,7 +121,8 @@ public class Parser {
         return result;
     }
 
-    private void parseProgram() {
+
+    /*private void parseProgram() {
         while (!accept(TokenClass.EOF)){
             if (accept(TokenClass.INCLUDE))
                 parseIncludes();
@@ -136,8 +140,15 @@ public class Parser {
                     return;
                 }
             }
-        }
+        }*/
+
+    private Program parseProgram() {
+        parseIncludes();
+        List<StructTypeDecl> stds = parseStructDecls();
+        List<VarDecl> vds = parseVarDecls();
+        List<FunDecl> fds = parseFunDecls();
         expect(TokenClass.EOF);
+        return new Program(stds, vds, fds);
     }
 
     // includes are ignored, so does not need to return an AST node
@@ -165,7 +176,7 @@ public class Parser {
     }
 
 
-    private void parseStructDecls() {
+    /*private void parseStructDecls() {
         // to be completed ...
         expect(TokenClass.LBRA);
         parseType();
@@ -177,7 +188,7 @@ public class Parser {
         expect(TokenClass.RBRA);
         expect(TokenClass.SC);
 
-    }
+    }*/
 
     private void OneVarDecls() {
             Token ahead = lookAhead(1);
@@ -230,11 +241,7 @@ public class Parser {
         }
         //exp "=" exp ";"   |    exp ";"
         else {
-//            if(accept(TokenClass.IDENTIFIER) && lookAhead(1).tokenClass.equals(TokenClass.LPAR)){
-//                parseFunCall();
-//                expect(TokenClass.SC);
-//            }
-//            else {
+
                 parseExp();
                 if (accept(TokenClass.ASSIGN)){
                     nextToken();
@@ -328,22 +335,26 @@ public class Parser {
 
     }
 
-    private void parseArgRep(){
-        if (accept(TokenClass.COMMA)){
+    private void parseArgRep() {
+        if (accept(TokenClass.COMMA)) {
             nextToken();
             parseExp();
             parseArgRep();
         }
     }
-
-    private void parseFunDecls() {
+    private List<StructTypeDecl> parseStructDecls(){
         // to be completed ...
-        expect(TokenClass.IDENTIFIER);
-        expect(TokenClass.LPAR);
-        parseParameter();
-        expect(TokenClass.RPAR);
-        parseBlock();
+        return null;
+    }
 
+    private List<VarDecl> parseVarDecls(){
+        // to be completed ...
+        return null;
+    }
+
+    private List<FunDecl> parseFunDecls(){
+        // to be completed ...
+        return null;
     }
 
     private void parseParameter(){
