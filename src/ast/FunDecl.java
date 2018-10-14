@@ -16,6 +16,6 @@ public class FunDecl implements ASTNode {
     }
 
     public <T> T accept(ASTVisitor<T> v) {
-	return v.visitFunDecl(this);
+        return v.visitFunDecl(this);
     }
 }

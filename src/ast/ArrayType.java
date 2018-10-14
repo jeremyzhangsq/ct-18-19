@@ -1,6 +1,6 @@
 package ast;
 
-public class ArrayType {
+public class ArrayType implements Type{
     public final Type type;
     public final int arrSize;
 
