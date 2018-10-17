@@ -67,7 +67,7 @@ public class ASTPrinter implements ASTVisitor<Void> {
 
     @Override
     public Void visitVarExpr(VarExpr v) {
-        writer.print("Var(");
+        writer.print("VarExpr(");
         writer.print(v.name);
         writer.print(")");
         return null;
@@ -75,18 +75,58 @@ public class ASTPrinter implements ASTVisitor<Void> {
 
     @Override
     public Void visitBaseType(BaseType bt) {
-        // to complete ...
+        writer.print("BaseType(");
+        switch (bt){
+            case CHAR:
+                writer.print("CHAR");
+            case INT:
+                writer.print("INT");
+            case VOID:
+                writer.print("void");
+        }
+        writer.print(")");
         return null;
     }
 
     @Override
     public Void visitStructType(StructType st) {
+        writer.print("StructType(");
+        writer.print(st.structName);
+        writer.print(")");
         return null;
     }
 
     @Override
-    public Void visitArrayType(ArrayType at) {
+    public Void visitPointerType(PointerType pt) {
+        writer.print("PointerType(");
+        Type t = pt.type;
+        printType(t);
+        writer.print(")");
         return null;
+    }
+
+
+    @Override
+    public Void visitArrayType(ArrayType at) {
+        writer.print("ArrayType(");
+        Type t = at.type;
+        printType(t);
+        writer.print(",");
+        writer.print(at.arrSize);
+        writer.print(")");
+        return null;
+    }
+    private void printType(Type t) {
+        if (t instanceof BaseType)
+            visitBaseType((BaseType) t);
+        else if (t instanceof StructType)
+            visitStructType((StructType) t);
+        else if (t instanceof ArrayType)
+            visitArrayType((ArrayType) t);
+        else if (t instanceof PointerType)
+            visitPointerType((PointerType) t);
+        else
+            writer.print("INVALID TYPE");
     }
 
     @Override
@@ -169,10 +209,7 @@ public class ASTPrinter implements ASTVisitor<Void> {
         return null;
     }
 
-    @Override
-    public Void visitPointerType(PointerType pt) {
-        return null;
-    }
+
 
     @Override
     public Void visitStructTypeDecl(StructTypeDecl st) {
