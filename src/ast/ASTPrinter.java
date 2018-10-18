@@ -15,7 +15,30 @@ public class ASTPrinter implements ASTVisitor<Void> {
     @Override
     public Void visitBlock(Block b) {
         writer.print("Block(");
-        // to complete
+        if (b.vars.size()==1){
+            b.vars.get(0).accept(this);
+        }
+        else if (b.vars.size() > 1){
+            for (int i = 0;i<b.vars.size()-1;i++){
+                VarDecl vd = b.vars.get(i);
+                vd.accept(this);
+                writer.print(",");
+            }
+            b.vars.get(b.vars.size()-1).accept(this);
+        }
+        if (b.stmts.size() >0)
+            writer.print(",");
+        if (b.stmts.size()==1){
+            b.stmts.get(0).accept(this);
+        }
+        else if (b.stmts.size() > 1){
+            for (int i = 0;i<b.stmts.size()-1;i++){
+                Stmt stmt = b.stmts.get(i);
+                stmt.accept(this);
+                writer.print(",");
+            }
+            b.stmts.get(b.stmts.size()-1).accept(this);
+        }
         writer.print(")");
         return null;
     }
