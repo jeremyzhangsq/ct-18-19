@@ -122,6 +122,25 @@ public class Parser {
         return result;
     }
 
+    /*private void parseProgram() {
+        while (!accept(TokenClass.EOF)){
+            if (accept(TokenClass.INCLUDE))
+                parseIncludes();
+            else {
+                parseType();
+                Token t = lookAhead(1);
+                if (accept(TokenClass.LBRA))
+                    parseStructDecls();
+                else if (accept(TokenClass.IDENTIFIER) && (t.tokenClass.equals(TokenClass.SC)||t.tokenClass.equals(TokenClass.LSBR)))
+                    OneVarDecls();
+                else if (accept(TokenClass.IDENTIFIER) && t.tokenClass.equals(TokenClass.LPAR))
+                    parseFunDecls();
+                else {
+                    error(token.tokenClass);
+                    return;
+                }
+            }
+        }*/
 
     private Program parseProgram() {
         List<StructTypeDecl> stds = new ArrayList<>();
@@ -136,18 +155,18 @@ public class Parser {
                     && lookAhead(2).tokenClass.equals(TokenClass.LBRA)){
                 stds.add(parseStructDecls());
             }
-            else if (accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID,TokenClass.STRUCT)){
+            else{
                 t = parseType();
                 name = expect(TokenClass.IDENTIFIER).data;
                 if (accept(TokenClass.SC))
                     vds.add(getVarDecls(t,name));
                 else if (accept(TokenClass.LPAR))
                     fds.add(parseFunDecls(t,name));
+                else {
+                    error(token.tokenClass);
+                    if (!accept(TokenClass.EOF)) nextToken();
+                }
             }
-            else{
-
-            }
-
         }
         expect(TokenClass.EOF);
         return new Program(stds, vds, fds);
@@ -239,6 +258,16 @@ public class Parser {
         return null;
     }
 
+//    private void parseFunCall(){
+//        expect(TokenClass.IDENTIFIER);
+//        expect(TokenClass.LPAR);
+//        if (!accept(TokenClass.RPAR)){
+//            parseExp();
+//            parseArgRep();
+//        }
+//        expect(TokenClass.RPAR);
+//
+//    }
 
 
 
@@ -377,16 +406,6 @@ public class Parser {
 //        }
 //    }
 
-//    private void parseFunCall(){
-//        expect(TokenClass.IDENTIFIER);
-//        expect(TokenClass.LPAR);
-//        if (!accept(TokenClass.RPAR)){
-//            parseExp();
-//            parseArgRep();
-//        }
-//        expect(TokenClass.RPAR);
-//
-//    }
 
 //    private void parseArgRep() {
 //        if (accept(TokenClass.COMMA)) {

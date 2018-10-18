@@ -1,4 +1,9 @@
 
+struct b{
+    int a;
+    int * b;
+    int[10] arr;
+};
 struct a{
     int a;
     int * b;
