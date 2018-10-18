@@ -136,7 +136,11 @@ public class Parser {
             }
             else{
                 t = parseType();
-                name = expect(TokenClass.IDENTIFIER).data;
+                Token tok = expect(TokenClass.IDENTIFIER);
+                if (tok!=null)
+                    name = tok.data;
+                else
+                    name = "invalid";
                 if (accept(TokenClass.SC)){
                     vds.add(new VarDecl(t,name));
                     expect(TokenClass.SC);
@@ -204,7 +208,10 @@ public class Parser {
         Token cur;
         t = parseType();
         cur = expect(TokenClass.IDENTIFIER);
-        return new VarDecl(t, cur.data);
+        if(cur != null)
+            return new VarDecl(t, cur.data);
+        else
+            return null;
     }
     private BaseType parseBaseType() {
         if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID)){
