@@ -96,9 +96,10 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	}
 
 	@Override
-	public Type visitorReturn(Return r) {
+	public Type visitReturn(Return r) {
 		return null;
 	}
+
 
 	@Override
 	public Type visitPointerType(PointerType pt) {

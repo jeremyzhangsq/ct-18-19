@@ -19,7 +19,7 @@ public interface ASTVisitor<T> {
     public T visitAssign(Assign a);
     public T visitExprStmt(ExprStmt est);
     public T visitorIf(If i);
-    public T visitorReturn(Return r);
+    public T visitReturn(Return r);
     public T visitPointerType(PointerType pt);
     public T visitStructTypeDecl(StructTypeDecl st);
     public T visitBlock(Block b);

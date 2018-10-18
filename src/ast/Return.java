@@ -10,6 +10,6 @@ public class Return extends Stmt {
     }
     @Override
     public <T> T accept(ASTVisitor<T> v) {
-        return v.visitorReturn(this);
+        return v.visitReturn(this);
     }
 }

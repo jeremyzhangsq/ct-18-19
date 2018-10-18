@@ -96,9 +96,10 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
 	}
 
 	@Override
-	public Void visitorReturn(Return r) {
+	public Void visitReturn(Return r) {
 		return null;
 	}
+
 
 	@Override
 	public Void visitPointerType(PointerType pt) {
