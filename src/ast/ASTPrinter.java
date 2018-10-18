@@ -1,6 +1,9 @@
 package ast;
 
 import java.io.PrintWriter;
+import static ast.BaseType.CHAR;
+import static ast.BaseType.INT;
+import static ast.BaseType.VOID;
 
 public class ASTPrinter implements ASTVisitor<Void> {
 
@@ -64,6 +67,17 @@ public class ASTPrinter implements ASTVisitor<Void> {
         writer.print(")");
         return null;
     }
+    @Override
+    public Void visitStructTypeDecl(StructTypeDecl st) {
+        writer.print("StructTypeDecl(");
+        st.stype.accept(this);
+        for(VarDecl vd: st.vars){
+            writer.print(",");
+            vd.accept(this);
+        }
+        writer.print(")");
+        return null;
+    }
 
     @Override
     public Void visitVarExpr(VarExpr v) {
@@ -75,16 +89,14 @@ public class ASTPrinter implements ASTVisitor<Void> {
 
     @Override
     public Void visitBaseType(BaseType bt) {
-        writer.print("BaseType(");
-        switch (bt){
-            case CHAR:
-                writer.print("CHAR");
-            case INT:
-                writer.print("INT");
-            case VOID:
-                writer.print("void");
-        }
-        writer.print(")");
+        if (bt == BaseType.CHAR)
+            writer.print("CHAR");
+        else if (bt == BaseType.INT)
+            writer.print("INT");
+        else if (bt == BaseType.VOID)
+            writer.print("VOID");
+        else
+            writer.print("INVALID");
         return null;
     }
 
@@ -210,12 +222,6 @@ public class ASTPrinter implements ASTVisitor<Void> {
     }
 
 
-
-    @Override
-    public Void visitStructTypeDecl(StructTypeDecl st) {
-        // to complete ...
-        return null;
-    }
 
     // to complete ...
     

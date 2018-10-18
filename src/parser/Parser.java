@@ -134,18 +134,26 @@ public class Parser {
 
     // includes are ignored, so does not need to return an AST node
     private void parseIncludes() {
-        nextToken();
-        expect(TokenClass.STRING_LITERAL);
+        if (accept(TokenClass.INCLUDE)){
+            nextToken();
+            expect(TokenClass.STRING_LITERAL);
+        }
     }
 
     private List<StructTypeDecl> parseStructDecls() {
         // to be completed ...
-        StructType st = parseStructType();
-        expect(TokenClass.LBRA);
-        List<VarDecl> vds = parseVarDecls();
-        expect(TokenClass.RBRA);
-        expect(TokenClass.SC);
-        return null;
+        List<StructTypeDecl> sds = new ArrayList<>();
+        while (accept(TokenClass.STRUCT) && lookAhead(1).tokenClass.equals(TokenClass.IDENTIFIER)
+                && lookAhead(2).tokenClass.equals(TokenClass.LBRA)){
+            StructType st = parseStructType();
+            expect(TokenClass.LBRA);
+            List<VarDecl> vds = parseVarDecls();
+            expect(TokenClass.RBRA);
+            expect(TokenClass.SC);
+            sds.add(new StructTypeDecl(st,vds));
+        }
+
+        return sds;
     }
 
 
@@ -154,10 +162,14 @@ public class Parser {
         List<VarDecl> vds = new ArrayList<>();
         Type t;
         Token cur;
-        while(!accept(TokenClass.RBRA)){
-            t = parseType();
-            cur = expect(TokenClass.IDENTIFIER);
-            vds.add(new VarDecl(t, cur.data));
+        if (accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID,TokenClass.STRUCT)){
+            while(!accept(TokenClass.RBRA)){
+                t = parseType();
+                cur = expect(TokenClass.IDENTIFIER);
+                expect(TokenClass.SC);
+                vds.add(new VarDecl(t, cur.data));
+            }
+
         }
         return vds;
     }
@@ -175,6 +187,7 @@ public class Parser {
     }
     private StructType parseStructType(){
         if(accept(TokenClass.STRUCT)){
+            nextToken();
             Token cur = expect(TokenClass.IDENTIFIER);
             return new StructType(cur.data);
         }
@@ -182,8 +195,7 @@ public class Parser {
     }
     private Type parseType(){
         Type t;
-        if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID)
-                && lookAhead(1).tokenClass.equals(TokenClass.IDENTIFIER)){
+        if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID)){
             t =  parseBaseType();
         }
         else if (accept(TokenClass.STRUCT)) {
@@ -209,7 +221,8 @@ public class Parser {
 
     private List<FunDecl> parseFunDecls(){
         // to be completed ...
-        return null;
+        List<FunDecl> fds = new ArrayList<>();
+        return fds;
     }
 
 
