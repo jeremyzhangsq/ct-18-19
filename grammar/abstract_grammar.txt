@@ -70,7 +70,7 @@ If         ::= Expr Stmt [Stmt]
 Return     ::= [Expr]
 
 // Expressions
-Expr       ::= IntLiteral | StrLiteral | ChrLiteral | VarExpr | FunCallExpr | BinOp | ArrayAccessExpr | FieldAccessExpr | ValueAtExpr | SizeOfExpr | TypecastExpr
+Expr       ::= IntLiteral | StrLiteral | ChrLiteral | VarExpr | FunCallExpr | SizeOfExpr | TypecastExpr | ValueAtExpr | BinOp | ArrayAccessExpr | FieldAccessExpr
 
 // Statements
 Stmt       ::= Block | While | If | Assign | Return | ExprStmt
