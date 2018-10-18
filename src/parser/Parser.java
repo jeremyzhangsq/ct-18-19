@@ -124,54 +124,69 @@ public class Parser {
 
 
     private Program parseProgram() {
-        parseIncludes();
-        List<StructTypeDecl> stds = parseStructDecls();
-        List<VarDecl> vds = parseVarDecls();
-        List<FunDecl> fds = parseFunDecls();
+        List<StructTypeDecl> stds = new ArrayList<>();
+        List<VarDecl> vds = new ArrayList<>();
+        List<FunDecl> fds = new ArrayList<>();
+        Type t;
+        String name;
+        while (!accept(TokenClass.EOF)){
+            if (accept(TokenClass.INCLUDE))
+                parseIncludes();
+            else if (accept(TokenClass.STRUCT) && lookAhead(1).tokenClass.equals(TokenClass.IDENTIFIER)
+                    && lookAhead(2).tokenClass.equals(TokenClass.LBRA)){
+                stds.add(parseStructDecls());
+            }
+            else if (accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID,TokenClass.STRUCT)){
+                t = parseType();
+                name = expect(TokenClass.IDENTIFIER).data;
+                if (accept(TokenClass.SC))
+                    vds.add(getVarDecls(t,name));
+                else if (accept(TokenClass.LPAR))
+                    fds.add(parseFunDecls(t,name));
+            }
+            else{
+
+            }
+
+        }
         expect(TokenClass.EOF);
         return new Program(stds, vds, fds);
     }
 
     // includes are ignored, so does not need to return an AST node
     private void parseIncludes() {
-        if (accept(TokenClass.INCLUDE)){
-            nextToken();
-            expect(TokenClass.STRING_LITERAL);
-        }
+        nextToken();
+        expect(TokenClass.STRING_LITERAL);
+
     }
 
-    private List<StructTypeDecl> parseStructDecls() {
+    private StructTypeDecl parseStructDecls() {
         // to be completed ...
-        List<StructTypeDecl> sds = new ArrayList<>();
-        while (accept(TokenClass.STRUCT) && lookAhead(1).tokenClass.equals(TokenClass.IDENTIFIER)
-                && lookAhead(2).tokenClass.equals(TokenClass.LBRA)){
-            StructType st = parseStructType();
-            expect(TokenClass.LBRA);
-            List<VarDecl> vds = parseVarDecls();
-            expect(TokenClass.RBRA);
-            expect(TokenClass.SC);
-            sds.add(new StructTypeDecl(st,vds));
-        }
-
-        return sds;
-    }
-
-
-    private List<VarDecl> parseVarDecls(){
-        // to be completed ...
+        StructType st = parseStructType();
+        expect(TokenClass.LBRA);
         List<VarDecl> vds = new ArrayList<>();
+        while (!accept(TokenClass.RBRA)){
+            vds.add(parseVarDecls());
+        }
+        expect(TokenClass.RBRA);
+        expect(TokenClass.SC);
+
+        return new StructTypeDecl(st,vds);
+    }
+
+
+    private VarDecl parseVarDecls(){
+        // to be completed ...
         Type t;
         Token cur;
-        if (accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID,TokenClass.STRUCT)){
-            while(!accept(TokenClass.RBRA)){
-                t = parseType();
-                cur = expect(TokenClass.IDENTIFIER);
-                expect(TokenClass.SC);
-                vds.add(new VarDecl(t, cur.data));
-            }
-
-        }
-        return vds;
+        t = parseType();
+        cur = expect(TokenClass.IDENTIFIER);
+        expect(TokenClass.SC);
+        return new VarDecl(t, cur.data);
+    }
+    private VarDecl getVarDecls(Type t, String name){
+        expect(TokenClass.SC);
+        return new VarDecl(t,name);
     }
     private BaseType parseBaseType() {
         if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID)){
@@ -219,10 +234,9 @@ public class Parser {
         return t;
     }
 
-    private List<FunDecl> parseFunDecls(){
+    private FunDecl parseFunDecls(Type t, String name){
         // to be completed ...
-        List<FunDecl> fds = new ArrayList<>();
-        return fds;
+        return null;
     }
 
 
