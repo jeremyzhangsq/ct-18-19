@@ -10,3 +10,4 @@ struct a{
     struct astruct * g;
     char d;
 };
+struct;

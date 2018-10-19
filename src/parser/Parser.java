@@ -229,7 +229,10 @@ public class Parser {
         if(accept(TokenClass.STRUCT)){
             nextToken();
             Token cur = expect(TokenClass.IDENTIFIER);
-            return new StructType(cur.data);
+            if (cur!=null)
+                return new StructType(cur.data);
+            else
+                return new StructType("Invalid");
         }
         return null;
     }
