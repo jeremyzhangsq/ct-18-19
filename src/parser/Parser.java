@@ -200,7 +200,19 @@ public class Parser {
 
         return new StructTypeDecl(st,vds);
     }
-
+//    private void parseStructDecls() {
+//        // to be completed ...
+//        expect(TokenClass.LBRA);
+//        parseType();
+//        OneVarDecls();
+//        while (!accept(TokenClass.RBRA)){
+//            parseType();
+//            OneVarDecls();
+//        }
+//        expect(TokenClass.RBRA);
+//        expect(TokenClass.SC);
+//
+//    }
 
     private VarDecl parseVarDecls(){
         // to be completed ...
@@ -556,19 +568,7 @@ public class Parser {
 //    }
 //
 //
-//    private void parseStructDecls() {
-//        // to be completed ...
-//        expect(TokenClass.LBRA);
-//        parseType();
-//        OneVarDecls();
-//        while (!accept(TokenClass.RBRA)){
-//            parseType();
-//            OneVarDecls();
-//        }
-//        expect(TokenClass.RBRA);
-//        expect(TokenClass.SC);
-//
-//    }
+
 //
 //    private void OneVarDecls() {
 //        Token ahead = lookAhead(1);

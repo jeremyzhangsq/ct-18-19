@@ -91,7 +91,7 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	}
 
 	@Override
-	public Type visitorIf(If i) {
+	public Type visitIf(If i) {
 		return null;
 	}
 

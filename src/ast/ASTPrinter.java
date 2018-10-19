@@ -26,7 +26,7 @@ public class ASTPrinter implements ASTVisitor<Void> {
             }
             b.vars.get(b.vars.size()-1).accept(this);
         }
-        if (b.stmts.size() >0)
+        if (b.vars.size()>0 && b.stmts.size() >0)
             writer.print(",");
         if (b.stmts.size()==1){
             b.stmts.get(0).accept(this);
@@ -305,7 +305,7 @@ public class ASTPrinter implements ASTVisitor<Void> {
     }
 
     @Override
-    public Void visitorIf(If i) {
+    public Void visitIf(If i) {
         writer.print("If(");
         i.condition.accept(this);
         writer.print(",");

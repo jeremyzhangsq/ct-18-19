@@ -7,6 +7,6 @@ public class ExprStmt extends Stmt {
     }
     @Override
     public <T> T accept(ASTVisitor<T> v) {
-        return null;
+        return v.visitExprStmt(this);
     }
 }

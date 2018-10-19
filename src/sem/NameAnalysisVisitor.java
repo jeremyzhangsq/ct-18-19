@@ -91,7 +91,7 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
 	}
 
 	@Override
-	public Void visitorIf(If i) {
+	public Void visitIf(If i) {
 		return null;
 	}
 

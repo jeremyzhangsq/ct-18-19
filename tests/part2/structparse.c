@@ -1,8 +1,16 @@
-
+struct addrress
+{
+   char [50] a;
+   char [100] b;
+   char [50] c;
+   char [20] d;
+   int pin;
+};
 struct b{
     int a;
     int * b;
     int[10] arr;
+    void a;
 };
 struct a{
     struct asturct e;
@@ -10,4 +18,3 @@ struct a{
     struct astruct * g;
     char d;
 };
-struct;

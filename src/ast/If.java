@@ -15,6 +15,6 @@ public class If extends Stmt {
     }
     @Override
     public <T> T accept(ASTVisitor<T> v) {
-        return v.visitorIf(this);
+        return v.visitIf(this);
     }
 }
