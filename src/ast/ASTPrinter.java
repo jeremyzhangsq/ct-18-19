@@ -174,7 +174,8 @@ public class ASTPrinter implements ASTVisitor<Void> {
     @Override
     public Void visitStrLiteral(StrLiteral sl) {
         writer.print("StrLiteral(");
-        writer.print(sl.val);
+//        exclude ""
+        writer.print(sl.val.substring(1,sl.val.length()-1));
         writer.print(")");
         return null;
     }
