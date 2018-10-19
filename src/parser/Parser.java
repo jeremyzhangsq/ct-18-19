@@ -463,6 +463,41 @@ public class Parser {
         return parseExprStar(expr);
 
     }
+    private Expr parseTerm(){
+        Expr lhs = parseFactor();
+        if (accept(TokenClass.ASTERIX,TokenClass.DIV)){
+            Op op;
+            if (accept(TokenClass.ASTERIX))
+                op = Op.MUL;
+            else
+                op = Op.DIV;
+            nextToken();
+            Expr rhs = parseTerm();
+            return new BinOp(lhs,op,rhs);
+        }
+        return lhs;
+    }
+    private Expr parseFactor(){
+        if (accept(TokenClass.LPAR)
+                && !lookAhead(1).tokenClass.equals(TokenClass.INT)
+                && !lookAhead(1).tokenClass.equals(TokenClass.CHAR)
+                && !lookAhead(1).tokenClass.equals(TokenClass.VOID)
+                && !lookAhead(1).tokenClass.equals(TokenClass.STRUCT)){
+            Expr e = parseExp();
+            expect(TokenClass.RPAR);
+            return e;
+        }
+        else if (accept(TokenClass.INT_LITERAL)){
+            Token t = expect(TokenClass.INT_LITERAL);
+            return new IntLiteral(Integer.valueOf(t.data));
+        }
+        else if (accept(TokenClass.IDENTIFIER)){
+            Token t = expect(TokenClass.IDENTIFIER);
+            return new VarExpr(t.data);
+
+        }
+        else return null;
+    }
 //    private void parseExprStar(){
 //        if(accept(TokenClass.PLUS,TokenClass.DIV,TokenClass.MINUS,
 //                TokenClass.ASTERIX,TokenClass.GT,TokenClass.GE,TokenClass.LE,
@@ -508,7 +543,6 @@ public class Parser {
                         TokenClass.ASTERIX,TokenClass.GT,TokenClass.GE,TokenClass.LE,
                         TokenClass.LT,TokenClass.NE,TokenClass.EQ,TokenClass.OR,
                         TokenClass.AND,TokenClass.REM);
-                Expr rhs = parseExp();
                 Op op;
                 if (t.tokenClass == TokenClass.PLUS)  op = Op.ADD;
                 else if (t.tokenClass == TokenClass.MINUS) op = Op.SUB;
@@ -524,7 +558,7 @@ public class Parser {
                 else if (t.tokenClass == TokenClass.AND) op = Op.AND;
                 else if (t.tokenClass == TokenClass.REM) op = Op.MOD;
                 else op = Op.ADD;
-
+                Expr rhs = parseExp();
                 newExpr = new BinOp(expr, op, rhs);
             }
             return parseExprStar(newExpr);

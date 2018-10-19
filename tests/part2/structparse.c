@@ -1,3 +1,6 @@
+struct node {
+  struct node *next;
+};
 struct addrress
 {
    char [50] a;
