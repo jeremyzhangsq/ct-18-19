@@ -1,23 +1,23 @@
 struct node {
   struct node *next;
 };
+struct node a[10];
+struct node a;
 struct addrress
 {
-   char [50] a;
-   char [100] b;
-   char [50] c;
-   char [20] d;
+   char a[50];
+   char b[100];
    int pin;
 };
 struct b{
     int a;
-    int * b;
-    int[10] arr;
+    int* b;
+    int arr[10];
     void a;
 };
 struct a{
     struct asturct e;
-    struct astruct[10] f;
-    struct astruct * g;
+    struct astruct f[10];
+    struct astruct* g;
     char d;
 };
