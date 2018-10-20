@@ -481,7 +481,7 @@ public class Parser {
         Token ahead;
         Expr expr;
         if(accept(TokenClass.LPAR)){
-            int precedence = 7;
+            int precedence = 8;
             expr = parseArithmetic(precedence);
             if (expr == null)
                 nextToken();
@@ -497,7 +497,7 @@ public class Parser {
             expr = new ChrLiteral(t.data.charAt(0));
         }
         else if(accept(TokenClass.INT_LITERAL)) {
-            int precedence = 1;
+            int precedence = 0;
             expr = parseArithmetic(precedence);
 
         }
@@ -512,7 +512,7 @@ public class Parser {
             }
             else {
 //                Token t = expect(TokenClass.IDENTIFIER);
-                int precedence = 1;
+                int precedence = 0;
                 expr = parseArithmetic(precedence);
 
             }
@@ -532,7 +532,14 @@ public class Parser {
         else if (accept(TokenClass.MINUS)) {
             nextToken();
             Expr e = parseExp();
-            expr = new BinOp(new IntLiteral(0), Op.SUB, e);
+            if (e instanceof BinOp){
+                expr = parseUniary(((BinOp) e).lhs);
+                expr = new BinOp(expr,((BinOp) e).op,((BinOp) e).rhs);
+            }
+            else {
+                expr = new BinOp(new IntLiteral(0), Op.SUB, e);
+            }
+
         }
         else {
             error(token.tokenClass);
@@ -543,6 +550,23 @@ public class Parser {
         return parseExprStar(expr);
 
     }
+    private Expr parseUniary(Expr e){
+        if (e instanceof BinOp) {
+            if (((BinOp) e).precedence>7){
+            Expr ne = new BinOp(new IntLiteral(0),Op.SUB,e);
+            ((BinOp) ne).precedence = 7;
+            return ne;
+            }
+        }
+        if (!(e instanceof BinOp )){
+            Expr ne = new BinOp(new IntLiteral(0),Op.SUB,e);
+            ((BinOp) ne).precedence = 7;
+            return ne;
+        }
+
+        Expr ne = new BinOp(parseUniary(((BinOp)e).lhs),((BinOp) e).op,((BinOp) e).rhs);
+        return ne;
+    }
     private Expr leftAssociate(Expr expr){
         if (!(expr instanceof BinOp))
             return expr;
@@ -551,10 +575,10 @@ public class Parser {
         Expr a = leftAssociate(((BinOp) expr).lhs);
         Op b = ((BinOp) expr).op;
         Expr c = leftAssociate(((BinOp) expr).rhs);
-        if (((BinOp) expr).rhs instanceof BinOp)
+        if (((BinOp) expr).rhs instanceof BinOp && ((BinOp) expr).precedence==((BinOp) ((BinOp) expr).rhs).precedence)
             return new BinOp(new BinOp(a,b,((BinOp) c).lhs), ((BinOp) c).op, ((BinOp) c).rhs);
         else
-            return new BinOp(a,b,c);
+            return expr;
     }
     private Expr parseArithmetic(int precedence){
         Expr lhs = parseOr(precedence);
@@ -660,6 +684,8 @@ public class Parser {
                 && !lookAhead(1).tokenClass.equals(TokenClass.STRUCT)){
             nextToken();
             Expr e = parseExp();
+            if (e instanceof BinOp)
+                ((BinOp) e).precedence += 8;
             expect(TokenClass.RPAR);
             return e;
         }
