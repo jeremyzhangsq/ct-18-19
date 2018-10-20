@@ -328,19 +328,47 @@ public class Parser {
 
     private FunDecl parseFunDecls(Type t, String name){
         // to be completed ...
-        List<VarDecl> vds = new ArrayList<>();
+        List<VarDecl> vds;
         expect(TokenClass.LPAR);
-        if (accept(TokenClass.INT,TokenClass.VOID,TokenClass.CHAR,TokenClass.STRUCT)){
-            vds.add(parseVarDecls());
-            while (accept(TokenClass.COMMA)){
-                nextToken();
-                vds.add(parseVarDecls());
-            }
-        }
+        vds = parseParameter();
         expect(TokenClass.RPAR);
         Block b = parseBlock();
         return new FunDecl(t,name,vds,b);
     }
+
+    private VarDecl singleArg(){
+        Type t = parseType();
+        Token tok = expect(TokenClass.IDENTIFIER);
+        String name;
+        if (tok!=null)
+            name = tok.data;
+        else
+            name = "invalid";
+        if (accept(TokenClass.COMMA,TokenClass.RPAR)){
+            return new VarDecl(t,name);
+        }
+        else if (accept(TokenClass.LSBR)){
+            nextToken();
+            Token token = expect(TokenClass.INT_LITERAL);
+            if (token != null)
+                t = new ArrayType(t, Integer.valueOf(token.data));
+            expect(TokenClass.RSBR);
+            return new VarDecl(t, name);
+        }
+        else return null;
+    }
+    private List<VarDecl> parseParameter(){
+        List<VarDecl> vds = new ArrayList<>();
+        if (accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT)) {
+            vds.add(singleArg());
+            while (accept(TokenClass.COMMA)){
+                nextToken();
+                vds.add(singleArg());
+            }
+        }
+        return vds;
+    }
+
     private Block parseBlock(){
         expect(TokenClass.LBRA);
         List<VarDecl> vds = new ArrayList<>();
@@ -668,7 +696,6 @@ public class Parser {
         expect(TokenClass.RPAR);
         return new FunCallExpr(name.data,exps);
     }
-
 
 //
 //    private void parseStructType(){
