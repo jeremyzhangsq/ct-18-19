@@ -324,7 +324,8 @@ public class ASTPrinter implements ASTVisitor<Void> {
     @Override
     public Void visitReturn(Return r) {
         writer.print("Return(");
-        r.optionReturn.accept(this);
+        if (r.optionReturn != null)
+            r.optionReturn.accept(this);
         writer.print(")");
         return null;
     }

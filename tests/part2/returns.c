@@ -5,6 +5,8 @@ int main(){
     if (a<11){
         return 1;
     }
-    return b;
-
+    if(a==11){
+        return;
+    }
+    return d();
 }
