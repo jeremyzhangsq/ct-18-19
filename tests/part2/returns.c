@@ -1,14 +1,14 @@
 
 int main(){
-//    int a;
-//    a = 10;
-//    if (a<11){
-//        return 1;
-//    }
-//    if(a==11){
-//        return;
-//    }
-    return;
-    return;
-    return d();
+    return 0;
+    return ;
+    return a[10];
+    return -func();
+    return a<b;
+    return *p;
+    return (a-b);
+    return c.d;
+    return (int) a;
+    return a;
+
 }
