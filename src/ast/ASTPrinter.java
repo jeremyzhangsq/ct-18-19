@@ -311,9 +311,12 @@ public class ASTPrinter implements ASTVisitor<Void> {
         i.condition.accept(this);
         writer.print(",");
         i.stmt.accept(this);
-        writer.print(",");
-        if (i.elseStmt!=null)
+
+        if (i.elseStmt!=null){
+            writer.print(",");
             i.elseStmt.accept(this);
+        }
+
         writer.print(")");
         return null;
     }
