@@ -4,7 +4,7 @@ int main(){
     return ;
     return a[10];
     return -func();
-    return a<b;
+    return a<b+c+d;
     return *p;
     return (a-b);
     return c.d;

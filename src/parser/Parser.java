@@ -390,6 +390,7 @@ public class Parser {
             TokenClass cur = expect(TokenClass.WHILE, TokenClass.IF).tokenClass;
             expect(TokenClass.LPAR);
             Expr e = parseExp();
+            e = leftAssociate(e);
             expect(TokenClass.RPAR);
             Stmt st = parseStatement();
             if (cur.equals(TokenClass.WHILE))
@@ -411,6 +412,7 @@ public class Parser {
             }
             else {
                 Expr e = parseExp();
+                e = leftAssociate(e);
                 expect(TokenClass.SC);
                 return new Return(e);
             }
@@ -584,8 +586,12 @@ public class Parser {
             return expr1;
         }
 
-        else
-            return expr;
+        else {
+            Expr expr1 = new BinOp(a,b,c);
+            ((BinOp) expr1).precedence = ((BinOp) expr).precedence;
+            return expr1;
+        }
+
     }
     private Expr parseArithmetic(int precedence){
         Expr lhs = parseOr(precedence);
