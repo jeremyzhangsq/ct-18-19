@@ -5,7 +5,7 @@ import java.util.List;
 public class FunCallExpr extends Expr {
     public final String funcName;
     public final List<Expr> params;
-
+    public FunDecl fd;
     public FunCallExpr(String funcName, List<Expr> params){
         this.funcName = funcName;
         this.params = params;
