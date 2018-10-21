@@ -2,6 +2,9 @@ package sem;
 
 import ast.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
 	public Scope scope;
 	public NameAnalysisVisitor(){
@@ -11,6 +14,24 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
     @Override
     public Void visitProgram(Program p) {
         // To be completed...
+        // insert default function
+
+        List<VarDecl> avds = new ArrayList<>();
+        avds.add(new VarDecl(new PointerType(BaseType.CHAR),"s"));
+        Block block = new Block(null,null);
+        scope.put(new FuncSymbol(new FunDecl(BaseType.VOID, "print_s", avds,block)));
+        avds = new ArrayList<>();
+        avds.add(new VarDecl(BaseType.INT,"i"));
+        scope.put(new FuncSymbol(new FunDecl(BaseType.INT, "print_i", avds,block)));
+        avds = new ArrayList<>();
+        avds.add(new VarDecl(BaseType.CHAR,"c"));
+        scope.put(new FuncSymbol(new FunDecl(BaseType.CHAR, "print_c", avds,block)));
+        avds = new ArrayList<>();
+        scope.put(new FuncSymbol(new FunDecl(BaseType.CHAR, "read_c", avds,block)));
+        scope.put(new FuncSymbol(new FunDecl(BaseType.INT, "read_i", avds,block)));
+        avds.add(new VarDecl(BaseType.INT,"size"));
+        scope.put(new FuncSymbol(new FunDecl(new PointerType(BaseType.VOID), "mcmalloc", avds,block)));
+
         for (StructTypeDecl std : p.structTypeDecls) {
             std.accept(this);
         }
