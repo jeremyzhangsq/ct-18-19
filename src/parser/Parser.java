@@ -575,8 +575,15 @@ public class Parser {
         Expr a = leftAssociate(((BinOp) expr).lhs);
         Op b = ((BinOp) expr).op;
         Expr c = leftAssociate(((BinOp) expr).rhs);
-        if (((BinOp) expr).rhs instanceof BinOp && ((BinOp) expr).precedence==((BinOp) ((BinOp) expr).rhs).precedence)
-            return new BinOp(new BinOp(a,b,((BinOp) c).lhs), ((BinOp) c).op, ((BinOp) c).rhs);
+        if (((BinOp) expr).rhs instanceof BinOp && ((BinOp) expr).precedence==((BinOp) ((BinOp) expr).rhs).precedence){
+            Expr newexpr = new BinOp(a,b,((BinOp) c).lhs);
+            ((BinOp) newexpr).precedence = ((BinOp)c).precedence;
+            newexpr = leftAssociate(newexpr);
+            Expr expr1 = new BinOp(newexpr, ((BinOp) c).op, ((BinOp) c).rhs);
+            ((BinOp) expr1).precedence = ((BinOp)newexpr).precedence;
+            return expr1;
+        }
+
         else
             return expr;
     }
