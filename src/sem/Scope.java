@@ -18,6 +18,8 @@ public class Scope {
 		Symbol cur = lookupCurrent(name);
 		if (cur != null)
 			return cur;
+		if (outer == null)
+		    return null;
 		return outer.lookup(name);
 	}
 	

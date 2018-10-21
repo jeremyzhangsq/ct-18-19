@@ -28,9 +28,6 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
         return null;
     }
 
-    @Override
-    public Void visitBinOp(BinOp bop) { return null; }
-
 	@Override
 	public Void visitBaseType(BaseType bt) { return null; }
 
@@ -50,9 +47,7 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
 	}
 
 	@Override
-	public Void visitIntLiteral(IntLiteral il) {
-		return null;
-	}
+	public Void visitIntLiteral(IntLiteral il) { return null; }
 
 	@Override
 	public Void visitStrLiteral(StrLiteral sl) {
@@ -63,14 +58,36 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
 	public Void visitChrLiteral(ChrLiteral cl) { return null; }
 
     @Override
-    public Void visitStructTypeDecl(StructTypeDecl sts) {
-        // To be completed...
+    public Void visitBlock(Block b) {
+        Scope oldScope = scope;
+        scope = new Scope(oldScope);
+        for (VarDecl vd : b.vars)
+            vd.accept(this);
+        for (Stmt st : b.stmts)
+            st.accept(this);
+        scope = oldScope;
+        return null;
+    }
+
+    @Override
+    public Void visitStructTypeDecl(StructTypeDecl std) {
+        Symbol s = scope.lookupCurrent(std.stype.structName);
+        if (s !=null)
+            error("Existed StructTypeDecl:"+std.stype.structName);
+        else
+            scope.put(new StructSymbol(std));
+
+        Scope oleScope = scope;
+        scope = new Scope(oleScope);
+        for (VarDecl vd : std.vars){
+            vd.accept(this);
+        }
+        scope = oleScope;
         return null;
     }
 
     @Override
     public Void visitFunDecl(FunDecl p) {
-        // To be completed...
         Symbol s = scope.lookupCurrent(p.name);
         if (s !=null)
             error("Existed FunDecl:"+p.name);
@@ -94,8 +111,10 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
     }
 
     @Override
-	public Void visitSizeOfExpr(SizeOfExpr soe) {
-		return null;
+    public Void visitBinOp(BinOp bop) {
+	    bop.lhs.accept(this);
+	    bop.rhs.accept(this);
+	    return null;
 	}
 
 	@Override
@@ -121,62 +140,82 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
             v.vd = ((VarDeclSymbol) vs).vd;
         return null;
     }
+
 	@Override
-	public Void visitArrayAccessExpr(ArrayAccessExpr aae) { return null; }
+	public Void visitArrayAccessExpr(ArrayAccessExpr aae) {
+	    aae.arr.accept(this);
+	    aae.idx.accept(this);
+	    return null;
+	}
 
 	@Override
 	public Void visitFieldAccessExpr(FieldAccessExpr fae) {
+	    fae.structure.accept(this);
 		return null;
 	}
 
 	@Override
 	public Void visitValueAtExpr(ValueAtExpr vae) {
+	    vae.val.accept(this);
 		return null;
 	}
 
 	@Override
 	public Void visitTypecastExpr(TypecastExpr te) {
+	    te.expr.accept(this);
 		return null;
 	}
 
-	@Override
-	public Void visitWhile(While w) {
-		return null;
-	}
+    @Override
+    public Void visitSizeOfExpr(SizeOfExpr soe) { return null; }
+
+    @Override
+    public Void visitIf(If i) {
+        ifWhileCommon(i.condition, i.stmt);
+        if (i.elseStmt != null)
+            i.elseStmt.accept(this);
+        return null;
+    }
+
+    @Override
+    public Void visitWhile(While w) {
+        ifWhileCommon(w.expr, w.stmt);
+        return null;
+    }
+
+    private void ifWhileCommon(Expr expr, Stmt stmt) {
+	    expr.accept(this);
+        if (stmt instanceof Block)
+            stmt.accept(this);
+        else {
+            Scope old = scope;
+            scope = new Scope(old);
+            stmt.accept(this);
+            scope = old;
+        }
+    }
+
 
 	@Override
 	public Void visitAssign(Assign a) {
-	    Expr lhs = a.lhs;
-	    Expr rhs = a.rhs;
-	    lhs.accept(this);
-	    rhs.accept(this);
+        a.lhs.accept(this);
+        a.rhs.accept(this);
 		return null;
 	}
 
 	@Override
 	public Void visitExprStmt(ExprStmt est) {
+	    est.expr.accept(this);
 		return null;
 	}
 
-	@Override
-	public Void visitIf(If i) {
-		return null;
-	}
 
 	@Override
 	public Void visitReturn(Return r) {
+	    if (r.optionReturn != null)
+	        r.optionReturn.accept(this);
 		return null;
 	}
 
-	@Override
-	public Void visitBlock(Block b) {
-		Scope oldScope = scope;
-		scope = new Scope(oldScope);
-		for (VarDecl vd : b.vars)
-		    vd.accept(this);
-		for (Stmt st : b.stmts)
-		    st.accept(this);
-		scope = oldScope;
-		return null;
-	}
+
 }
