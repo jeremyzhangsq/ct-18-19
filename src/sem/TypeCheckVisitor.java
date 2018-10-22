@@ -63,6 +63,12 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
         return null;
     }
 
+	@Override
+	public Type visitStructTypeDecl(StructTypeDecl st) {
+        for (VarDecl vd : st.vars)
+            vd.accept(this);
+		return null;
+	}
     @Override
     public Type visitBlock(Block b) {
         for (VarDecl vd : b.vars)
@@ -77,7 +83,8 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	    Type t = soe.type;
 	    if (t == BaseType.INT)
 	        return t;
-	    else error("Invalid Type Should be Int:"+t.getClass());
+	    else
+	    	error("Invalid Type Should be Int:"+t.getClass());
 		return null;
 	}
 
@@ -101,7 +108,7 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
             if (t.getClass() == nt.getClass()){
 				if (t instanceof BaseType && nt instanceof BaseType){
 					if ( t !=  nt)
-						error("Param Type Mismatch:"+t .getClass());
+						error("Param Type Mismatch:"+ t.getClass());
 				}
 				else if (t instanceof StructType && nt instanceof StructType){
 					if ( t !=  nt)
@@ -185,6 +192,14 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 
 	@Override
 	public Type visitFieldAccessExpr(FieldAccessExpr fae) {
+		Type t = fae.structure.accept(this);
+		if (t instanceof StructType && fae.structure instanceof VarExpr){
+		    for (VarDecl vd : ((VarExpr) fae.structure).std.vars){
+		        if (vd.varName.equals(fae.fieldName))
+		            return t;
+            }
+            error("Non Exist Struct Field:"+fae.fieldName);
+        }
 		return null;
 	}
 
@@ -240,11 +255,7 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 
 
 
-	@Override
-	public Type visitStructTypeDecl(StructTypeDecl st) {
-		// To be completed...
-		return null;
-	}
+
 
 
 

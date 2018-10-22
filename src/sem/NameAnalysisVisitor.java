@@ -166,8 +166,14 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
             error("Not Declared Variable:"+v.name);
         else if (!(vs instanceof VarDeclSymbol))
             error("Wrong Symbol:"+vs.getClass());
-        else
+        else{
             v.vd = ((VarDeclSymbol) vs).vd;
+            if (v.vd.type instanceof StructType){
+                Symbol nvs = scope.lookup(((StructType) v.vd.type).structName);
+                v.std= ((StructSymbol) nvs).std;
+            }
+        }
+
         return null;
     }
 
