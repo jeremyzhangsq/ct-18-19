@@ -84,44 +84,51 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	@Override
 	public Type visitFunCallExpr(FunCallExpr fce) {
 	    int i = 0;
-	    if (fce.params.size() != fce.fd.params.size())
-            error("Param Type Mismatch:"+fce.params.size());
+	    if (fce.fd == null)
+	    	return null;
+	    if (fce.params.size() != fce.fd.params.size()){
+			error("Param Type Mismatch:"+fce.params.size());
+			return null;
+		}
+
 	    for (Expr expr : fce.params){
-            expr.accept(this);
+            Type t = expr.accept(this);
+            if (t == null)
+            	return null;
             Type nt = fce.fd.params.get(i).type;
-            if (expr.type.getClass() == nt.getClass()){
-				if (expr.type instanceof BaseType && nt instanceof BaseType){
-					if ( expr.type !=  nt)
-						error("Param Type Mismatch:"+expr.type .getClass());
+            if (nt == null)
+            	return null;
+            if (t.getClass() == nt.getClass()){
+				if (t instanceof BaseType && nt instanceof BaseType){
+					if ( t !=  nt)
+						error("Param Type Mismatch:"+t .getClass());
 				}
-				else if (expr.type instanceof StructType && nt instanceof StructType){
-					if ( expr.type !=  nt)
-						error("Param Type Mismatch:"+expr.type .getClass());
+				else if (t instanceof StructType && nt instanceof StructType){
+					if ( t !=  nt)
+						error("Param Type Mismatch:"+ t.getClass());
 				}
-				else if (expr.type instanceof ArrayType && nt instanceof ArrayType){
-					if (((ArrayType) expr.type).type !=  ((ArrayType) nt).type)
-						error("Param Type Mismatch:"+((ArrayType) expr.type).type.getClass());
+				else if (t instanceof ArrayType && nt instanceof ArrayType){
+					if (((ArrayType) t).type !=  ((ArrayType) nt).type)
+						error("Param Type Mismatch:"+((ArrayType) t).type.getClass());
 				}
-				else if (expr.type instanceof PointerType && nt instanceof PointerType){
-					if (((PointerType) expr.type).type != ((PointerType) nt).type)
-						error("Param Type Mismatch:"+((PointerType) expr.type).type.getClass());
+				else if (t instanceof PointerType && nt instanceof PointerType){
+					if (((PointerType) t).type != ((PointerType) nt).type)
+						error("Param Type Mismatch:"+((PointerType) t).type.getClass());
 				}
 			}
 			else {
-				error("Param Type Mismatch:"+expr.type .getClass());
+				error("Param Type Mismatch:"+ t.getClass());
 			}
-
-
-
             i++;
         }
-
 	    fce.type = fce.fd.type;
 		return fce.fd.type;
 	}
 
     @Override
     public Type visitVarExpr(VarExpr v) {
+		if (v.vd==null)
+			return null;
         v.type = v.vd.type;
         return v.vd.type;
     }
@@ -129,7 +136,11 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
     @Override
 	public Type visitBinOp(BinOp bop) {
 	    Type lhsT = bop.lhs.accept(this);
+	    if (lhsT == null)
+	    	return null;
 	    Type rhsT = bop.rhs.accept(this);
+	    if (rhsT == null)
+	    	return null;
 	    if ((bop.op == Op.NE) || (bop.op == Op.EQ)){
             if ((lhsT instanceof StructType) || (lhsT instanceof ArrayType) || (lhsT == BaseType.VOID))
                 error("Illegal Operand Type for BinOp:"+lhsT.getClass());
@@ -153,7 +164,11 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	@Override
 	public Type visitArrayAccessExpr(ArrayAccessExpr aae) {
 	    Type t = aae.arr.accept(this);
+	    if (t == null)
+	    	return null;
         Type idT = aae.idx.accept(this);
+        if (idT == null)
+        	return null;
 	    if (t instanceof ArrayType || t instanceof PointerType){
 	        if (idT == BaseType.INT){
                 if (t instanceof ArrayType)
@@ -176,8 +191,11 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	@Override
 	public Type visitValueAtExpr(ValueAtExpr vae) {
 	    Type t = vae.val.accept(this);
-	    if (t instanceof PointerType)
-	        return ((PointerType) t).type;
+	    if (t instanceof PointerType){
+	    	vae.type = ((PointerType) t).type;
+			return ((PointerType) t).type;
+		}
+
 	    else
 	        error("Not PointerType:"+t.getClass());
 		return null;

@@ -161,29 +161,6 @@ public class Parser {
         expect(TokenClass.EOF);
         return new Program(stds, vds, fds);
     }
-    //    private void parseProgram() {
-//        while (!accept(TokenClass.EOF)){
-//            if (accept(TokenClass.INCLUDE))
-//                parseIncludes();
-//            else {
-//                parseType();
-//                Token t = lookAhead(1);
-//                if (accept(TokenClass.LBRA))
-//                    parseStructDecls();
-//                else if (accept(TokenClass.IDENTIFIER) && (t.tokenClass.equals(TokenClass.SC)||t.tokenClass.equals(TokenClass.LSBR)))
-//                    OneVarDecls();
-//                else if (accept(TokenClass.IDENTIFIER) && t.tokenClass.equals(TokenClass.LPAR))
-//                    parseFunDecls();
-//                else {
-//                    error(token.tokenClass);
-//                    return;
-//                }
-//            }
-//        }
-//        expect(TokenClass.EOF);
-//    }
-//
-
     // includes are ignored, so does not need to return an AST node
     private void parseIncludes() {
         nextToken();
@@ -207,19 +184,6 @@ public class Parser {
 
         return new StructTypeDecl(st,vds);
     }
-//    private void parseStructDecls() {
-//        // to be completed ...
-//        expect(TokenClass.LBRA);
-//        parseType();
-//        OneVarDecls();
-//        while (!accept(TokenClass.RBRA)){
-//            parseType();
-//            OneVarDecls();
-//        }
-//        expect(TokenClass.RBRA);
-//        expect(TokenClass.SC);
-//
-//    }
 
     private VarDecl parseVarDecls(){
         Type t;
@@ -251,28 +215,6 @@ public class Parser {
         }
     }
 
-    //    private void OneVarDecls() {
-//        Token ahead = lookAhead(1);
-//        if(accept(TokenClass.IDENTIFIER)){
-//            nextToken();
-//            if (ahead.tokenClass.equals(TokenClass.LSBR)){
-//                nextToken();
-//                expect(TokenClass.INT_LITERAL);
-//                expect(TokenClass.RSBR);
-//                expect(TokenClass.SC);
-//            }
-//            else if (ahead.tokenClass.equals(TokenClass.SC)) nextToken();
-//            else {
-//                error(token.tokenClass);
-//                if (!accept(TokenClass.RBRA)) nextToken();
-//            }
-//        }
-//        else {
-//            error(token.tokenClass);
-//            if (!accept(TokenClass.RBRA)) nextToken();
-//        }
-//
-//    }
     private BaseType parseBaseType() {
         if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID)){
             Token cur = expect(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID);
@@ -505,7 +447,7 @@ public class Parser {
         }
         else if(accept(TokenClass.STRING_LITERAL)) {
             Token t = expect(TokenClass.STRING_LITERAL);
-            expr = new StrLiteral(t.data);
+            expr = new StrLiteral(t.data.substring(1,t.data.length()-1));
         }
         else if(accept(TokenClass.IDENTIFIER)) {
             ahead = lookAhead(1);

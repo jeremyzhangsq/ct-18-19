@@ -175,7 +175,7 @@ public class ASTPrinter implements ASTVisitor<Void> {
     public Void visitStrLiteral(StrLiteral sl) {
         writer.print("StrLiteral(");
 //        exclude ""
-        writer.print(sl.val.substring(1,sl.val.length()-1));
+        writer.print(sl.val);
         writer.print(")");
         return null;
     }
