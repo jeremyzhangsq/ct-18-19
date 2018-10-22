@@ -120,14 +120,14 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	public Type visitArrayAccessExpr(ArrayAccessExpr aae) {
 	    Type t = aae.arr.accept(this);
         Type idT = aae.idx.accept(this);
-	    if (t instanceof ArrayType){
+	    if (t instanceof ArrayType || t instanceof PointerType){
 	        if (idT == BaseType.INT){
-//	            if (getArraySize(aae.idx) < ((ArrayType) t).arrSize){
-                return ((ArrayType) t).type;
-//                }
-//                else error("Out of Array Bound:"+((IntLiteral) idT).val);
-
-            }else error("Not A Int Index:"+idT.getClass());
+                if (t instanceof ArrayType)
+                    return ((ArrayType) t).type;
+                else
+                    return ((PointerType) t).type;
+            }
+            else error("Not A Int Index:"+idT.getClass());
         }
         else error("Not a Array Variable:"+t.getClass());
 
