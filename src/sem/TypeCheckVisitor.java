@@ -79,7 +79,10 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 
 	@Override
 	public Type visitFunCallExpr(FunCallExpr fce) {
-		return null;
+	    for (Expr expr : fce.params)
+	        expr.accept(this);
+	    fce.type = fce.fd.type;
+		return fce.fd.type;
 	}
 
     @Override
@@ -111,11 +114,7 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 		return null;
 	}
 
-//	private int getArraySize(Expr e){
-//	    if (e instanceof IntLiteral)
-//	        return ((IntLiteral)e).val;
-//	    else if(e instanceof )
-//    }
+
 	@Override
 	public Type visitArrayAccessExpr(ArrayAccessExpr aae) {
 	    Type t = aae.arr.accept(this);
