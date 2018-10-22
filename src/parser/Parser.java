@@ -534,13 +534,15 @@ public class Parser {
         else if (accept(TokenClass.MINUS)) {
             nextToken();
             Expr e = parseExp();
-            if (e instanceof BinOp){
-                expr = parseUniary(((BinOp) e).lhs);
-                expr = new BinOp(expr,((BinOp) e).op,((BinOp) e).rhs);
-            }
-            else {
-                expr = new BinOp(new IntLiteral(0), Op.SUB, e);
-            }
+//            if (e instanceof BinOp){
+            expr = parseUniary(e);
+//                expr = new BinOp(expr,((BinOp) e).op,((BinOp) e).rhs);
+//                ((BinOp) expr).precedence = ((BinOp) e).precedence;
+//            }
+//            else {
+//                expr = new BinOp(new IntLiteral(0), Op.SUB, e);
+//                ((BinOp) expr).precedence = ((BinOp) e).precedence;
+//            }
 
         }
         else {
@@ -555,9 +557,17 @@ public class Parser {
     private Expr parseUniary(Expr e){
         if (e instanceof BinOp) {
             if (((BinOp) e).precedence>7){
-            Expr ne = new BinOp(new IntLiteral(0),Op.SUB,e);
-            ((BinOp) ne).precedence = 7;
-            return ne;
+                if (!(((BinOp) e).lhs instanceof BinOp)){
+                    Expr ne = new BinOp(new IntLiteral(0),Op.SUB,e);
+                    ((BinOp) ne).precedence = ((BinOp) e).precedence + 7;
+                    return ne;
+                }
+                if ((((BinOp) e).lhs instanceof BinOp && ((BinOp) ((BinOp) e).lhs).precedence <= 7)){
+                    Expr ne = new BinOp(new IntLiteral(0),Op.SUB,e);
+                    ((BinOp) ne).precedence = ((BinOp)((BinOp) e).lhs).precedence+=7;
+                    return ne;
+
+                }
             }
         }
         if (!(e instanceof BinOp )){
@@ -567,6 +577,11 @@ public class Parser {
         }
 
         Expr ne = new BinOp(parseUniary(((BinOp)e).lhs),((BinOp) e).op,((BinOp) e).rhs);
+        ((BinOp) ne).precedence = ((BinOp) e).precedence;
+        if (((BinOp) e).lhs instanceof BinOp)
+            ((BinOp) ne).precedence += ((BinOp) ((BinOp) e).lhs).precedence;
+        if (((BinOp) e).rhs instanceof BinOp)
+            ((BinOp) ne).precedence += ((BinOp) ((BinOp) e).rhs).precedence;
         return ne;
     }
     private Expr leftAssociate(Expr expr){
