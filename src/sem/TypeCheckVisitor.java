@@ -218,6 +218,23 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 
 	@Override
 	public Type visitTypecastExpr(TypecastExpr te) {
+	    Type src = te.expr.accept(this);
+	    Type dst = te.type;
+	    if (src == null)
+	        return null;
+	    if (dst == null)
+	        return null;
+	    if (src == BaseType.CHAR && dst == BaseType.INT)
+	        return dst;
+	    else if (src instanceof ArrayType && dst instanceof PointerType){
+	        if (((PointerType) dst).type == ((ArrayType) src).type)
+                return ((PointerType) dst).type;
+        }
+        else if (src instanceof PointerType && dst instanceof PointerType){
+            return ((PointerType) dst).type;
+        }
+        error("Illegal Type Casting:"+src.getClass()+dst.getClass());
+
 		return null;
 	}
 

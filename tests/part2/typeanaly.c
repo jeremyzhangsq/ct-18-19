@@ -15,7 +15,10 @@ int p(char * arr, char c){
 int main(){
     int c;
 //    int *arr;
+    char cc;
+    char ac[10];
     char * arr;
+    int * is;
     arr = "";
 //    int arr;
     c = sizeof(int);
@@ -25,4 +28,7 @@ int main(){
     print_s(arr);
     print_c(*arr);
     *arr = 10;
+//    arr = (int*) ac;
+    arr = (char*) ac;
+    arr = (char*) is;
 }
