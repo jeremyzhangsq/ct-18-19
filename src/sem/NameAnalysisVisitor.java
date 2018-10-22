@@ -147,6 +147,8 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
             error("Wrong Symbol:"+fd.getClass());
         else
             fce.fd = ((FuncSymbol) fd).fd;
+        for (Expr e:fce.params)
+            e.accept(this);
         return null;
 	}
 

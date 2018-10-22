@@ -7,7 +7,7 @@ struct st{
 //int a;
 int p(){
     a = 10;
-    print_s(s);
+    print_s(a);
     print_i(a);
     print_c(a);
     read_c();
