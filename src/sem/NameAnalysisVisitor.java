@@ -114,10 +114,17 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
             error("Existed FunDecl:"+p.name);
         else
             scope.put(new FuncSymbol(p));
+        Scope oleScope = scope;
+        scope = new Scope(oleScope);
         for (VarDecl vd : p.params){
             vd.accept(this);
         }
-        p.block.accept(this);
+        Block b = p.block;
+        for (VarDecl vd : b.vars)
+            vd.accept(this);
+        for (Stmt st : b.stmts)
+            st.accept(this);
+        scope = oleScope;
         return null;
     }
 

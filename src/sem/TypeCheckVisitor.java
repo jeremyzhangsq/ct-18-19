@@ -84,8 +84,8 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 
     @Override
     public Type visitVarExpr(VarExpr v) {
-        // To be completed...
-        return null;
+        v.type = v.vd.type;
+        return v.vd.type;
     }
 
     @Override
@@ -140,6 +140,17 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 
 	@Override
 	public Type visitAssign(Assign a) {
+		Type lhsT = a.lhs.accept(this);
+		Type rhsT = a.rhs.accept(this);
+		if ((lhsT == BaseType.VOID ) || (lhsT instanceof ArrayType)){
+			error("Invalid Type for Assign Target:"+lhsT.getClass());
+		}
+		else {
+			if (lhsT == rhsT)
+				return lhsT;
+			else
+				error("Illegal Operand Type for BinOp:"+lhsT.getClass()+"\t"+rhsT.getClass());
+		}
 		return null;
 	}
 
