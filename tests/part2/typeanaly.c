@@ -10,6 +10,7 @@ int p(char * arr){
 
 int main(){
     int c;
-    char *arr;
+    int *arr;
     c = p(arr);
+    *arr = 10;
 }

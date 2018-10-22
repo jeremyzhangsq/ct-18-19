@@ -79,8 +79,14 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 
 	@Override
 	public Type visitFunCallExpr(FunCallExpr fce) {
-	    for (Expr expr : fce.params)
-	        expr.accept(this);
+	    int i = 0;
+	    for (Expr expr : fce.params){
+            Type t = expr.accept(this);
+            if (t != fce.fd.params.get(i).type)
+                error("Param Type Mismatch:"+t.getClass());
+            i++;
+        }
+
 	    fce.type = fce.fd.type;
 		return fce.fd.type;
 	}
@@ -140,6 +146,11 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 
 	@Override
 	public Type visitValueAtExpr(ValueAtExpr vae) {
+	    Type t = vae.val.accept(this);
+	    if (t instanceof PointerType)
+	        return ((PointerType) t).type;
+	    else
+	        error("Not PointerType:"+t.getClass());
 		return null;
 	}
 
