@@ -5,35 +5,72 @@ import ast.*;
 public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 
 	@Override
-	public Type visitBaseType(BaseType bt) {
-		// To be completed...
+	public Type visitProgram(Program p) {
+        for (StructTypeDecl std : p.structTypeDecls) {
+            std.accept(this);
+        }
+        for (VarDecl vd : p.varDecls) {
+            vd.accept(this);
+        }
+        for (FunDecl fd : p.funDecls) {
+            fd.accept(this);
+        }
 		return null;
 	}
+    @Override
+    public Type visitOp(Op op) { return null; }
+	@Override
+	public Type visitBaseType(BaseType bt) { return null; }
+
+    @Override
+    public Type visitPointerType(PointerType pt) {
+        return null;
+    }
+
+    @Override
+	public Type visitStructType(StructType st) { return null; }
 
 	@Override
-	public Type visitStructType(StructType st) {
-		return null;
-	}
-
-	@Override
-	public Type visitArrayType(ArrayType at) {
-		return null;
-	}
+	public Type visitArrayType(ArrayType at) { return null; }
 
 	@Override
 	public Type visitIntLiteral(IntLiteral il) {
-		return null;
+		return BaseType.INT;
 	}
 
 	@Override
 	public Type visitStrLiteral(StrLiteral sl) {
-		return null;
+	    int len = sl.val.length()+1;
+		return new ArrayType(BaseType.CHAR, len);
 	}
 
 	@Override
 	public Type visitChrLiteral(ChrLiteral cl) {
-		return null;
+		return BaseType.CHAR;
 	}
+    @Override
+    public Type visitFunDecl(FunDecl p) {
+	    for (VarDecl vd : p.params)
+	        vd.accept(this);
+	    p.block.accept(this);
+        return null;
+    }
+
+    @Override
+    public Type visitVarDecl(VarDecl vd) {
+        if (vd.type == BaseType.VOID)
+            error("Invalid Type VarDecl:" + BaseType.VOID);
+        return null;
+    }
+
+    @Override
+    public Type visitBlock(Block b) {
+        for (VarDecl vd : b.vars)
+            vd.accept(this);
+        for (Stmt st : b.stmts)
+            st.accept(this);
+        return null;
+    }
 
 	@Override
 	public Type visitSizeOfExpr(SizeOfExpr soe) {
@@ -45,8 +82,32 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 		return null;
 	}
 
-	@Override
+    @Override
+    public Type visitVarExpr(VarExpr v) {
+        // To be completed...
+        return null;
+    }
+
+    @Override
 	public Type visitBinOp(BinOp bop) {
+	    Type lhsT = bop.lhs.accept(this);
+	    Type rhsT = bop.rhs.accept(this);
+	    if ((bop.op == Op.NE) || (bop.op == Op.EQ)){
+            if ((lhsT instanceof StructType) || (lhsT instanceof ArrayType) || (lhsT == BaseType.VOID))
+                error("Illegal Operand Type for BinOp:"+lhsT.getClass());
+            else if ((rhsT instanceof StructType) || (rhsT instanceof ArrayType) || (rhsT == BaseType.VOID))
+                error("Illegal Operand Type for BinOp:"+rhsT.getClass());
+            else {
+                bop.type = BaseType.INT;
+                return BaseType.INT;
+            }
+        }else {
+	        if (lhsT == BaseType.INT && rhsT == BaseType.INT){
+	            bop.type = BaseType.INT;
+	            return BaseType.INT;
+            }
+            else error("Illegal Operand Type for BinOp:"+lhsT.getClass()+"\t"+rhsT.getClass());
+        }
 		return null;
 	}
 
@@ -70,10 +131,7 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 		return null;
 	}
 
-	@Override
-	public Type visitOp(Op op) {
-		return null;
-	}
+
 
 	@Override
 	public Type visitWhile(While w) {
@@ -101,10 +159,6 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	}
 
 
-	@Override
-	public Type visitPointerType(PointerType pt) {
-		return null;
-	}
 
 	@Override
 	public Type visitStructTypeDecl(StructTypeDecl st) {
@@ -112,38 +166,10 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 		return null;
 	}
 
-	@Override
-	public Type visitBlock(Block b) {
-		// To be completed...
-		return null;
-	}
-
-	@Override
-	public Type visitFunDecl(FunDecl p) {
-		// To be completed...
-		return null;
-	}
 
 
-	@Override
-	public Type visitProgram(Program p) {
-		// To be completed...
-		return null;
-	}
 
-	@Override
-	public Type visitVarDecl(VarDecl vd) {
-		// To be completed...
-		return null;
-	}
 
-	@Override
-	public Type visitVarExpr(VarExpr v) {
-		// To be completed...
-		return null;
-	}
-
-	// To be completed...
 
 
 }
