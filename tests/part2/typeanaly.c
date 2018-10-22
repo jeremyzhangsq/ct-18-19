@@ -10,7 +10,10 @@ int p(char * arr){
 
 int main(){
     int c;
-    int *arr;
+//    int *arr;
+    char * arr;
+//    int arr;
+    c = sizeof(int);
     c = p(arr);
     *arr = 10;
 }

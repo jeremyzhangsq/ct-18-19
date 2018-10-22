@@ -74,16 +74,45 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 
 	@Override
 	public Type visitSizeOfExpr(SizeOfExpr soe) {
+	    Type t = soe.type;
+	    if (t == BaseType.INT)
+	        return t;
+	    else error("Invalid Type Should be Int:"+t.getClass());
 		return null;
 	}
 
 	@Override
 	public Type visitFunCallExpr(FunCallExpr fce) {
 	    int i = 0;
+	    if (fce.params.size() != fce.fd.params.size())
+            error("Param Type Mismatch:"+fce.params.size());
 	    for (Expr expr : fce.params){
-            Type t = expr.accept(this);
-            if (t != fce.fd.params.get(i).type)
-                error("Param Type Mismatch:"+t.getClass());
+            expr.accept(this);
+            Type nt = fce.fd.params.get(i).type;
+            if (expr.type.getClass() == nt.getClass()){
+				if (expr.type instanceof BaseType && nt instanceof BaseType){
+					if ( expr.type !=  nt)
+						error("Param Type Mismatch:"+expr.type .getClass());
+				}
+				else if (expr.type instanceof StructType && nt instanceof StructType){
+					if ( expr.type !=  nt)
+						error("Param Type Mismatch:"+expr.type .getClass());
+				}
+				else if (expr.type instanceof ArrayType && nt instanceof ArrayType){
+					if (((ArrayType) expr.type).type !=  ((ArrayType) nt).type)
+						error("Param Type Mismatch:"+((ArrayType) expr.type).type.getClass());
+				}
+				else if (expr.type instanceof PointerType && nt instanceof PointerType){
+					if (((PointerType) expr.type).type != ((PointerType) nt).type)
+						error("Param Type Mismatch:"+((PointerType) expr.type).type.getClass());
+				}
+			}
+			else {
+				error("Param Type Mismatch:"+expr.type .getClass());
+			}
+
+
+
             i++;
         }
 
