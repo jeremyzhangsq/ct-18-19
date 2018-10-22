@@ -111,8 +111,26 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 		return null;
 	}
 
+//	private int getArraySize(Expr e){
+//	    if (e instanceof IntLiteral)
+//	        return ((IntLiteral)e).val;
+//	    else if(e instanceof )
+//    }
 	@Override
 	public Type visitArrayAccessExpr(ArrayAccessExpr aae) {
+	    Type t = aae.arr.accept(this);
+        Type idT = aae.idx.accept(this);
+	    if (t instanceof ArrayType){
+	        if (idT == BaseType.INT){
+//	            if (getArraySize(aae.idx) < ((ArrayType) t).arrSize){
+                return ((ArrayType) t).type;
+//                }
+//                else error("Out of Array Bound:"+((IntLiteral) idT).val);
+
+            }else error("Not A Int Index:"+idT.getClass());
+        }
+        else error("Not a Array Variable:"+t.getClass());
+
 		return null;
 	}
 
@@ -144,12 +162,6 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 		Type rhsT = a.rhs.accept(this);
 		if ((lhsT == BaseType.VOID ) || (lhsT instanceof ArrayType)){
 			error("Invalid Type for Assign Target:"+lhsT.getClass());
-		}
-		else {
-			if (lhsT == rhsT)
-				return lhsT;
-			else
-				error("Illegal Operand Type for BinOp:"+lhsT.getClass()+"\t"+rhsT.getClass());
 		}
 		return null;
 	}

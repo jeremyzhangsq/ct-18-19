@@ -1,7 +1,8 @@
-int a;
+int a[10];
+int b[10];
 //int p(char a){
 int p(){
-    a = 10;
+    a[b[1]] = 10;
     return 0;
 }
 
