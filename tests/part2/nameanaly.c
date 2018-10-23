@@ -2,6 +2,7 @@ int a;
 int arr[10];
 struct st{
     int a;
+//    int a;
     struct st *next;
 };
 //int fuc(){
@@ -32,12 +33,12 @@ int p(char a){
 
     return 0;
 }
-char* main(){
+int main(){
 //    a = 'a';
     void *fu;
 //    a = arr[p('a')];
     char* b;
     b = (char*)fu;
-    return b;
+    return 0;
 }
 

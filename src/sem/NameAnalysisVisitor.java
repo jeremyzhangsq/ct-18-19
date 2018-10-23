@@ -126,8 +126,10 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
 //        if (p.params.size()>0){
 //
 //        }
-        for (VarDecl vd : p.params){
-            vd.accept(this);
+        if (p.params != null){
+            for (VarDecl vd : p.params){
+                vd.accept(this);
+            }
         }
         Block b = p.block;
         if (b.vars != null){
@@ -168,8 +170,10 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
             error("Wrong Symbol:"+fd);
         else
             fce.fd = ((FuncSymbol) fd).fd;
-        for (Expr e:fce.params)
-            e.accept(this);
+        if (fce.params!=null){
+            for (Expr e:fce.params)
+                e.accept(this);
+        }
         return null;
 	}
 
@@ -182,6 +186,10 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
             error("Wrong Symbol:"+vs);
         else{
             v.vd = ((VarDeclSymbol) vs).vd;
+            if (v.vd.type == null){
+                error("Empty Type");
+                return null;
+            }
             if (v.vd.type instanceof StructType){
                 Symbol nvs = scope.lookup(((StructType) v.vd.type).structName);
                 if (nvs != null)
@@ -192,7 +200,6 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
                 }
             }
         }
-
         return null;
     }
 
