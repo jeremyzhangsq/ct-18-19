@@ -170,7 +170,12 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
             v.vd = ((VarDeclSymbol) vs).vd;
             if (v.vd.type instanceof StructType){
                 Symbol nvs = scope.lookup(((StructType) v.vd.type).structName);
-                v.std= ((StructSymbol) nvs).std;
+                if (nvs != null)
+                    v.std = ((StructSymbol) nvs).std;
+                else {
+                    v.std = null;
+                    error("Not Declared Struct");
+                }
             }
         }
 

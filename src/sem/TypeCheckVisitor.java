@@ -234,9 +234,11 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	public Type visitFieldAccessExpr(FieldAccessExpr fae) {
 		Type t = fae.structure.accept(this);
 		if (t instanceof StructType && fae.structure instanceof VarExpr){
-		    for (VarDecl vd : ((VarExpr) fae.structure).std.vars){
-		        if (vd.varName.equals(fae.fieldName))
-		            return t;
+		    if (((VarExpr) fae.structure).std != null){
+                for (VarDecl vd : ((VarExpr) fae.structure).std.vars){
+                    if (vd.varName.equals(fae.fieldName))
+                        return t;
+                }
             }
             error("Non Exist Struct Field:"+fae.fieldName);
         }
