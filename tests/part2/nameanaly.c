@@ -10,14 +10,14 @@ struct st{
 //int a;
 int p(char a){
 //    char a;
-    a = 10;
-    int b;
+//    a = 'a';
 //    int b;
-    print_s(a);
-    print_i(a);
-    print_c(a);
-    a = read_c();
-    b = read_i();
+////    int b;
+//    print_s(a);
+//    print_i(a);
+//    print_c(a);
+//    a = read_c();
+//    b = read_i();
 //    mcmalloc(a);
 //    struct st as[10];
 //    a = as.aa;
@@ -32,7 +32,12 @@ int p(char a){
 
     return 0;
 }
-int main(){
-    a = 'a';
+char* main(){
+    int a;
+    void *fu;
+//    a = arr[p('a')];
+//    char* b;
+//    b = (void*)fu;
+    return b;
 }
 

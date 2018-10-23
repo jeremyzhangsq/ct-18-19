@@ -53,19 +53,16 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	    if ((a instanceof BaseType || a instanceof StructType)
                 && (b instanceof BaseType || b instanceof StructType))
 	        return a==b;
-	    else if (a instanceof BaseType){
-	        if (b instanceof ArrayType)
-	            return isEqual(a, ((ArrayType) b).type);
-	        else
-	            return isEqual(a, ((PointerType) b).type);
+	    else {
+	        if (a.getClass() == b.getClass()){
+                if (a instanceof ArrayType)
+                    return isEqual(((ArrayType) a).type, ((ArrayType) b).type);
+                else if (a instanceof PointerType)
+                    return isEqual(((PointerType)a).type, ((PointerType) b).type);
+                else return false;
+            }
+            else return false;
         }
-        else {
-            if (a instanceof ArrayType)
-                return isEqual(((ArrayType) a).type, b);
-            else
-                return isEqual(((PointerType) a).type, b);
-        }
-
     }
     @Override
     public Type visitFunDecl(FunDecl p) {
@@ -274,10 +271,10 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	        return dst;
 	    else if (src instanceof ArrayType && dst instanceof PointerType){
 	        if (((PointerType) dst).type == ((ArrayType) src).type)
-                return ((PointerType) dst).type;
+                return dst;
         }
         else if (src instanceof PointerType && dst instanceof PointerType){
-            return ((PointerType) dst).type;
+            return dst;
         }
         error("Illegal Type Casting:"+src+dst);
 
@@ -301,9 +298,10 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
                 || a.lhs instanceof ArrayAccessExpr || a.lhs instanceof ValueAtExpr){
             Type lhsT = a.lhs.accept(this);
             Type rhsT = a.rhs.accept(this);
-            if ((lhsT == BaseType.VOID ) || (lhsT instanceof ArrayType)){
+            if ((lhsT == BaseType.VOID ) || (lhsT instanceof ArrayType))
                 error("Invalid Type for Assign Target:"+lhsT);
-            }
+            if (!isEqual(lhsT,rhsT))
+                error("Invalid Assign:"+lhsT+rhsT);
         }
         else
             error("Invalid LHS:"+a.lhs);
