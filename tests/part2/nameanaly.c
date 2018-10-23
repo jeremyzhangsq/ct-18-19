@@ -33,11 +33,11 @@ int p(char a){
     return 0;
 }
 char* main(){
-    int a;
+//    a = 'a';
     void *fu;
 //    a = arr[p('a')];
-//    char* b;
-//    b = (void*)fu;
+    char* b;
+    b = (char*)fu;
     return b;
 }
 

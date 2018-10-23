@@ -50,19 +50,24 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	}
 
 	private boolean isEqual(Type a, Type b){
-	    if ((a instanceof BaseType || a instanceof StructType)
-                && (b instanceof BaseType || b instanceof StructType))
+	    if (a instanceof StructType &&  b instanceof StructType)
 	        return a==b;
-	    else {
+	    else if (a == BaseType.INT && b ==BaseType.INT)
+	        return true;
+	    else if (a == BaseType.VOID && b == BaseType.VOID)
+	        return true;
+	    else if (a == BaseType.CHAR && b == BaseType.CHAR)
+	        return true;
+	    else if ((a instanceof PointerType || a instanceof ArrayType)
+                && (b instanceof PointerType || b instanceof ArrayType)){
 	        if (a.getClass() == b.getClass()){
                 if (a instanceof ArrayType)
                     return isEqual(((ArrayType) a).type, ((ArrayType) b).type);
-                else if (a instanceof PointerType)
+                else
                     return isEqual(((PointerType)a).type, ((PointerType) b).type);
-                else return false;
             }
-            else return false;
         }
+        return false;
     }
     @Override
     public Type visitFunDecl(FunDecl p) {
