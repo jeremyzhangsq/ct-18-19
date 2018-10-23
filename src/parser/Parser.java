@@ -385,7 +385,7 @@ public class Parser {
         Token ahead;
         Expr expr;
         if(accept(TokenClass.LPAR)){
-            int precedence = 8;
+            int precedence = 0;
             expr = parseArithmetic(precedence);
             if (expr == null)
                 nextToken();
@@ -403,7 +403,6 @@ public class Parser {
         else if(accept(TokenClass.INT_LITERAL)) {
             int precedence = 0;
             expr = parseArithmetic(precedence);
-
         }
         else if(accept(TokenClass.STRING_LITERAL)) {
             Token t = expect(TokenClass.STRING_LITERAL);
@@ -437,7 +436,6 @@ public class Parser {
             nextToken();
             Expr e = parseExp();
             expr = parseUniary(e);
-
         }
         else {
             error(token.tokenClass);
@@ -449,34 +447,26 @@ public class Parser {
 
     }
     private Expr parseUniary(Expr e){
-        if (e instanceof BinOp) {
-            if (((BinOp) e).precedence>7){
-                if (!(((BinOp) e).lhs instanceof BinOp)){
-                    Expr ne = new BinOp(new IntLiteral(0),Op.SUB,e);
-                    ((BinOp) ne).precedence = ((BinOp) e).precedence + 7;
-                    return ne;
-                }
-                if ((((BinOp) e).lhs instanceof BinOp && ((BinOp) ((BinOp) e).lhs).precedence <= 7)){
-                    Expr ne = new BinOp(new IntLiteral(0),Op.SUB,e);
-                    ((BinOp) ne).precedence = ((BinOp)((BinOp) e).lhs).precedence+=7;
-                    return ne;
-
-                }
+        if (e instanceof BinOp){
+            Expr nexp;
+            if (((BinOp) e).precedence<=7){
+                Expr ne = new BinOp(new IntLiteral(0), Op.SUB, ((BinOp) e).lhs);
+                ((BinOp) ne).precedence = 7;
+                nexp = new BinOp(ne, ((BinOp) e).op, ((BinOp) e).rhs);
+                ((BinOp) nexp).precedence = ((BinOp) e).precedence;
             }
+            else {
+                nexp = new BinOp(new IntLiteral(0), Op.SUB, e);
+                ((BinOp) nexp).precedence = 7;
+            }
+            return nexp;
         }
-        if (!(e instanceof BinOp )){
-            Expr ne = new BinOp(new IntLiteral(0),Op.SUB,e);
+        else {
+            Expr ne = new BinOp(new IntLiteral(0), Op.SUB, e);
             ((BinOp) ne).precedence = 7;
             return ne;
         }
 
-        Expr ne = new BinOp(parseUniary(((BinOp)e).lhs),((BinOp) e).op,((BinOp) e).rhs);
-        ((BinOp) ne).precedence = ((BinOp) e).precedence;
-        if (((BinOp) e).lhs instanceof BinOp)
-            ((BinOp) ne).precedence += ((BinOp) ((BinOp) e).lhs).precedence;
-        if (((BinOp) e).rhs instanceof BinOp)
-            ((BinOp) ne).precedence += ((BinOp) ((BinOp) e).rhs).precedence;
-        return ne;
     }
     private Expr leftAssociate(Expr expr){
         if (!(expr instanceof BinOp))
@@ -612,8 +602,8 @@ public class Parser {
                 && !lookAhead(1).tokenClass.equals(TokenClass.STRUCT)){
             nextToken();
             Expr e = parseArithmetic(p+8);
-            if (e instanceof BinOp)
-                ((BinOp) e).precedence += 8;
+//            if (e instanceof BinOp)
+//                ((BinOp) e).precedence += 8;
             expect(TokenClass.RPAR);
             return e;
         }
@@ -624,7 +614,14 @@ public class Parser {
         else if (accept(TokenClass.IDENTIFIER)){
             Token t = expect(TokenClass.IDENTIFIER);
             return new VarExpr(t.data);
-
+        }
+        else if (accept(TokenClass.MINUS)) {
+            Token t = expect(TokenClass.MINUS);
+            Expr e = parseExp();
+            Expr expr = parseUniary(e);
+            if (expr instanceof BinOp)
+                ((BinOp) expr).precedence += p;
+            return expr;
         }
         else return parseExp();
     }
