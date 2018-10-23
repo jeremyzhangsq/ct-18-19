@@ -4,31 +4,35 @@ struct st{
     int a;
     struct st *next;
 };
+//int fuc(){
+//    return 0;
+//}
 //int a;
-int p(){
+int p(char a){
+//    char a;
     a = 10;
+    int b;
+//    int b;
     print_s(a);
     print_i(a);
     print_c(a);
-    read_c();
-    read_i();
-    mcmalloc(a);
+    a = read_c();
+    b = read_i();
+//    mcmalloc(a);
 //    struct st as[10];
 //    a = as.aa;
 //    a = as.next;
 //    a = arr[4];
 //    as[1].next = *as;
 //    while (b < 10){
-    while (a < 10){
-        int a;
-        a = 20;
-    }
+//    while (a < 10){
+//        int a;
+//        a = 20;
+//    }
 
     return 0;
 }
 int main(){
-    int a;
-    a = p();
     a = 'a';
 }
 

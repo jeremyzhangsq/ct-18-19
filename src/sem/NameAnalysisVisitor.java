@@ -17,29 +17,36 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
         // insert default function
 
         List<VarDecl> avds = new ArrayList<>();
+        FunDecl fd;
         avds.add(new VarDecl(new PointerType(BaseType.CHAR),"s"));
         Block block = new Block(null,null);
-        scope.put(new FuncSymbol(new FunDecl(BaseType.VOID, "print_s", avds,block)));
+        fd = new FunDecl(BaseType.VOID, "print_s", avds,block);
+        p.funDecls.add(0,fd);
         avds = new ArrayList<>();
         avds.add(new VarDecl(BaseType.INT,"i"));
-        scope.put(new FuncSymbol(new FunDecl(BaseType.INT, "print_i", avds,block)));
+        fd = new FunDecl(BaseType.INT, "print_i", avds,block);
+        p.funDecls.add(0,fd);
         avds = new ArrayList<>();
         avds.add(new VarDecl(BaseType.CHAR,"c"));
-        scope.put(new FuncSymbol(new FunDecl(BaseType.CHAR, "print_c", avds,block)));
+        fd = new FunDecl(BaseType.CHAR, "print_c", avds,block);
+        p.funDecls.add(0,fd);
         avds = new ArrayList<>();
-        scope.put(new FuncSymbol(new FunDecl(BaseType.CHAR, "read_c", avds,block)));
-        scope.put(new FuncSymbol(new FunDecl(BaseType.INT, "read_i", avds,block)));
+        fd = new FunDecl(BaseType.CHAR, "read_c", avds,block);
+        p.funDecls.add(0,fd);
+        fd = new FunDecl(BaseType.INT, "read_i", avds,block);
+        p.funDecls.add(0,fd);
+        avds = new ArrayList<>();
         avds.add(new VarDecl(BaseType.INT,"size"));
-        scope.put(new FuncSymbol(new FunDecl(new PointerType(BaseType.VOID), "mcmalloc", avds,block)));
-
+        fd = new FunDecl(new PointerType(BaseType.VOID), "mcmalloc", avds,block);
+        p.funDecls.add(0,fd);
         for (StructTypeDecl std : p.structTypeDecls) {
             std.accept(this);
         }
         for (VarDecl vd : p.varDecls) {
             vd.accept(this);
         }
-        for (FunDecl fd : p.funDecls) {
-            fd.accept(this);
+        for (FunDecl fds : p.funDecls) {
+            fds.accept(this);
         }
         return null;
     }
@@ -116,14 +123,21 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
             scope.put(new FuncSymbol(p));
         Scope oleScope = scope;
         scope = new Scope(oleScope);
+//        if (p.params.size()>0){
+//
+//        }
         for (VarDecl vd : p.params){
             vd.accept(this);
         }
         Block b = p.block;
-        for (VarDecl vd : b.vars)
-            vd.accept(this);
-        for (Stmt st : b.stmts)
-            st.accept(this);
+        if (b.vars != null){
+            for (VarDecl vd : b.vars)
+                vd.accept(this);
+        }
+        if (b.stmts != null){
+            for (Stmt st : b.stmts)
+                st.accept(this);
+        }
         scope = oleScope;
         return null;
     }

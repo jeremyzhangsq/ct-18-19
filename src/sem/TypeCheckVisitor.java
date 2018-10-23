@@ -72,6 +72,10 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	    for (VarDecl vd : p.params)
 	        vd.accept(this);
 	    Block b = p.block;
+	    if (b.vars == null)
+	    	return null;
+	    if (b.stmts == null)
+	    	return null;
         for (VarDecl vd : b.vars)
             vd.accept(this);
         for (Stmt st : b.stmts){
