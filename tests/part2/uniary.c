@@ -8,6 +8,6 @@ void main(){
 //    a = -stut.b;
 //    a < -b;
 //    -a*-b*2;
-//    -b*-a;
+    return (a*-(e+d))*d;
 //    -(-(a+b)-(-b));
 }
