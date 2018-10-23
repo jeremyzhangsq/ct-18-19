@@ -6,10 +6,19 @@ struct s{
 };
 struct s ns;
 //int p(char a){
-int p(char * arr, char c){
+int[10] afun(){
+    int a[9];
+    return a;
+}
+char* p(char * arr, char c){
     a[b[1]] = 10;
     arr[1] = 10;
-    return 0;
+    int p;
+    p = 1;
+    while(p){
+        arr[2] = 10;
+    }
+    return arr;
 }
 
 int main(){

@@ -151,7 +151,7 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
         if (fd == null)
             error("Not Declared Function:"+fce.funcName);
         else if (!(fd instanceof FuncSymbol))
-            error("Wrong Symbol:"+fd.getClass());
+            error("Wrong Symbol:"+fd);
         else
             fce.fd = ((FuncSymbol) fd).fd;
         for (Expr e:fce.params)
@@ -165,7 +165,7 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
         if (vs == null)
             error("Not Declared Variable:"+v.name);
         else if (!(vs instanceof VarDeclSymbol))
-            error("Wrong Symbol:"+vs.getClass());
+            error("Wrong Symbol:"+vs);
         else{
             v.vd = ((VarDeclSymbol) vs).vd;
             if (v.vd.type instanceof StructType){

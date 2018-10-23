@@ -48,11 +48,51 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	public Type visitChrLiteral(ChrLiteral cl) {
 		return BaseType.CHAR;
 	}
+
+	private boolean isEqual(Type a, Type b){
+	    if ((a instanceof BaseType || a instanceof StructType)
+                && (b instanceof BaseType || b instanceof StructType))
+	        return a==b;
+	    else if (a instanceof BaseType){
+	        if (b instanceof ArrayType)
+	            return isEqual(a, ((ArrayType) b).type);
+	        else
+	            return isEqual(a, ((PointerType) b).type);
+        }
+        else {
+            if (a instanceof ArrayType)
+                return isEqual(((ArrayType) a).type, b);
+            else
+                return isEqual(((PointerType) a).type, b);
+        }
+
+    }
     @Override
     public Type visitFunDecl(FunDecl p) {
 	    for (VarDecl vd : p.params)
 	        vd.accept(this);
-	    p.block.accept(this);
+	    Block b = p.block;
+        for (VarDecl vd : b.vars)
+            vd.accept(this);
+        for (Stmt st : b.stmts){
+            Type t = st.accept(this);
+            if (st instanceof Return){
+                if (t == null && p.type == BaseType.VOID)
+                    continue;
+                else if (isEqual(t,p.type)){
+                    if (t instanceof ArrayType && p.type instanceof ArrayType){
+                        if (((ArrayType) t).arrSize != ((ArrayType) p.type).arrSize)
+                            error("Unmatch Array Size:"+((ArrayType) t).arrSize);
+                    }
+                }
+
+                else {
+                    error("Illegal Return:"+t);
+                    return null;
+                }
+            }
+        }
+
         return null;
     }
 
@@ -84,7 +124,7 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	    if (t == BaseType.INT)
 	        return t;
 	    else
-	    	error("Invalid Type Should be Int:"+t.getClass());
+	    	error("Invalid Type Should be Int:"+t);
 		return null;
 	}
 
@@ -105,26 +145,26 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
             Type nt = fce.fd.params.get(i).type;
             if (nt == null)
             	return null;
-            if (t.getClass() == nt.getClass()){
+            if (isEqual(t,nt)){
 				if (t instanceof BaseType && nt instanceof BaseType){
 					if ( t !=  nt)
-						error("Param Type Mismatch:"+ t.getClass());
+						error("Param Type Mismatch:"+ t);
 				}
 				else if (t instanceof StructType && nt instanceof StructType){
 					if ( t !=  nt)
-						error("Param Type Mismatch:"+ t.getClass());
+						error("Param Type Mismatch:"+ t);
 				}
 				else if (t instanceof ArrayType && nt instanceof ArrayType){
 					if (((ArrayType) t).type !=  ((ArrayType) nt).type)
-						error("Param Type Mismatch:"+((ArrayType) t).type.getClass());
+						error("Param Type Mismatch:"+((ArrayType) t).type);
 				}
 				else if (t instanceof PointerType && nt instanceof PointerType){
 					if (((PointerType) t).type != ((PointerType) nt).type)
-						error("Param Type Mismatch:"+((PointerType) t).type.getClass());
+						error("Param Type Mismatch:"+((PointerType) t).type);
 				}
 			}
 			else {
-				error("Param Type Mismatch:"+ t.getClass());
+				error("Param Type Mismatch:"+ t);
 			}
             i++;
         }
@@ -150,9 +190,9 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	    	return null;
 	    if ((bop.op == Op.NE) || (bop.op == Op.EQ)){
             if ((lhsT instanceof StructType) || (lhsT instanceof ArrayType) || (lhsT == BaseType.VOID))
-                error("Illegal Operand Type for BinOp:"+lhsT.getClass());
+                error("Illegal Operand Type for BinOp:"+lhsT);
             else if ((rhsT instanceof StructType) || (rhsT instanceof ArrayType) || (rhsT == BaseType.VOID))
-                error("Illegal Operand Type for BinOp:"+rhsT.getClass());
+                error("Illegal Operand Type for BinOp:"+rhsT);
             else {
                 bop.type = BaseType.INT;
                 return BaseType.INT;
@@ -162,7 +202,7 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	            bop.type = BaseType.INT;
 	            return BaseType.INT;
             }
-            else error("Illegal Operand Type for BinOp:"+lhsT.getClass()+"\t"+rhsT.getClass());
+            else error("Illegal Operand Type for BinOp:"+lhsT+rhsT);
         }
 		return null;
 	}
@@ -183,9 +223,9 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
                 else
                     return ((PointerType) t).type;
             }
-            else error("Not A Int Index:"+idT.getClass());
+            else error("Not A Int Index:"+idT);
         }
-        else error("Not a Array Variable:"+t.getClass());
+        else error("Not a Array Variable:"+t);
 
 		return null;
 	}
@@ -212,7 +252,7 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 		}
 
 	    else
-	        error("Not PointerType:"+t.getClass());
+	        error("Not PointerType:"+t);
 		return null;
 	}
 
@@ -233,7 +273,7 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
         else if (src instanceof PointerType && dst instanceof PointerType){
             return ((PointerType) dst).type;
         }
-        error("Illegal Type Casting:"+src.getClass()+dst.getClass());
+        error("Illegal Type Casting:"+src+dst);
 
 		return null;
 	}
@@ -242,6 +282,10 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 
 	@Override
 	public Type visitWhile(While w) {
+	    Type condition = w.expr.accept(this);
+	    w.stmt.accept(this);
+	    if (condition != BaseType.INT)
+	        error("Contition Should Return Int:"+condition);
 		return null;
 	}
 
@@ -250,7 +294,7 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 		Type lhsT = a.lhs.accept(this);
 		Type rhsT = a.rhs.accept(this);
 		if ((lhsT == BaseType.VOID ) || (lhsT instanceof ArrayType)){
-			error("Invalid Type for Assign Target:"+lhsT.getClass());
+			error("Invalid Type for Assign Target:"+lhsT);
 		}
 		return null;
 	}
@@ -262,12 +306,22 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 
 	@Override
 	public Type visitIf(If i) {
+	    Type condition = i.condition.accept(this);
+	    Type st = i.stmt.accept(this);
+	    if (i.elseStmt != null){
+            Type opst = i.elseStmt.accept(this);
+        }
+        if (condition != BaseType.INT)
+            error("Contition Should Return Int:"+condition);
 		return null;
 	}
 
 	@Override
 	public Type visitReturn(Return r) {
-		return null;
+	    if (r.optionReturn != null){
+            return r.optionReturn.accept(this);
+        }
+	    return null;
 	}
 
 
