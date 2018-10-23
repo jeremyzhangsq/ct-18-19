@@ -291,11 +291,17 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 
 	@Override
 	public Type visitAssign(Assign a) {
-		Type lhsT = a.lhs.accept(this);
-		Type rhsT = a.rhs.accept(this);
-		if ((lhsT == BaseType.VOID ) || (lhsT instanceof ArrayType)){
-			error("Invalid Type for Assign Target:"+lhsT);
-		}
+	    if (a.lhs instanceof VarExpr || a.lhs instanceof FieldAccessExpr
+                || a.lhs instanceof ArrayAccessExpr || a.lhs instanceof ValueAtExpr){
+            Type lhsT = a.lhs.accept(this);
+            Type rhsT = a.rhs.accept(this);
+            if ((lhsT == BaseType.VOID ) || (lhsT instanceof ArrayType)){
+                error("Invalid Type for Assign Target:"+lhsT);
+            }
+        }
+        else
+            error("Invalid LHS:"+a.lhs);
+
 		return null;
 	}
 
