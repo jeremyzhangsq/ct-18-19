@@ -361,6 +361,7 @@ public class Parser {
         }
         else {
             Expr e1 = parseExp();
+            e1 = leftAssociate(e1);
             if (accept(TokenClass.ASSIGN)){
                 nextToken();
                 Expr e2 = parseExp();
@@ -380,47 +381,6 @@ public class Parser {
         }
     }
 
-    //    private void parseExp(){
-//        Token ahead;
-//        if(accept(TokenClass.LPAR)){
-//            nextToken();
-//            if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT)){
-//                parseType();
-//                expect(TokenClass.RPAR);
-//                parseExp();
-//            }
-//            else {
-//                parseExp();
-//                expect(TokenClass.RPAR);
-//            }
-//        }
-//        else if(accept(TokenClass.CHAR_LITERAL,TokenClass.STRING_LITERAL,TokenClass.INT_LITERAL)) nextToken();
-//        else if(accept(TokenClass.IDENTIFIER)) {
-//            ahead = lookAhead(1);
-//            if(ahead.tokenClass.equals(TokenClass.LPAR)){
-//                parseFunCall();;
-//            }
-//            else nextToken();
-//        }
-//        else if (accept(TokenClass.SIZEOF)){
-//            nextToken();
-//            expect(TokenClass.LPAR);
-//            parseType();
-//            expect(TokenClass.RPAR);
-//        }
-//        else if (accept(TokenClass.MINUS,TokenClass.ASTERIX)){
-//            nextToken();
-//            parseExp();
-//        }
-//        else {
-//            error(token.tokenClass);
-//            nextToken();
-//            return;
-//        }
-//
-//        parseExprStar();
-//
-//    }
     private Expr parseExp(){
         Token ahead;
         Expr expr;
@@ -476,15 +436,7 @@ public class Parser {
         else if (accept(TokenClass.MINUS)) {
             nextToken();
             Expr e = parseExp();
-//            if (e instanceof BinOp){
             expr = parseUniary(e);
-//                expr = new BinOp(expr,((BinOp) e).op,((BinOp) e).rhs);
-//                ((BinOp) expr).precedence = ((BinOp) e).precedence;
-//            }
-//            else {
-//                expr = new BinOp(new IntLiteral(0), Op.SUB, e);
-//                ((BinOp) expr).precedence = ((BinOp) e).precedence;
-//            }
 
         }
         else {
@@ -534,7 +486,7 @@ public class Parser {
         Expr a = leftAssociate(((BinOp) expr).lhs);
         Op b = ((BinOp) expr).op;
         Expr c = leftAssociate(((BinOp) expr).rhs);
-        if (((BinOp) expr).rhs instanceof BinOp && ((BinOp) expr).precedence==((BinOp) ((BinOp) expr).rhs).precedence){
+        if (((BinOp) expr).rhs instanceof BinOp && ((BinOp) expr).precedence >=((BinOp) ((BinOp) expr).rhs).precedence){
             Expr newexpr = new BinOp(a,b,((BinOp) c).lhs);
             ((BinOp) newexpr).precedence = ((BinOp)c).precedence;
             newexpr = leftAssociate(newexpr);
@@ -558,7 +510,7 @@ public class Parser {
             nextToken();
             Expr rhs = parseArithmetic(precedence);
             BinOp res = new BinOp(lhs,op,rhs);
-            res.precedence += (precedence+2);
+            updatePrece(precedence, res, 1);
             return res;
         }
         return lhs;
@@ -571,7 +523,7 @@ public class Parser {
             nextToken();
             Expr rhs = parseOr(p);
             BinOp res = new BinOp(lhs,op,rhs);
-            res.precedence += (p+2);
+            updatePrece(p, res, 2);
             return res;
         }
         return lhs;
@@ -587,7 +539,7 @@ public class Parser {
             nextToken();
             Expr rhs = parseAnd(p);
             BinOp res = new BinOp(lhs,op,rhs);
-            res.precedence += (p+3);
+            updatePrece(p, res, 3);
             return res;
         }
         return lhs;
@@ -607,11 +559,16 @@ public class Parser {
             nextToken();
             Expr rhs = parseLowRelation(p);
             BinOp res = new BinOp(lhs,op,rhs);
-            res.precedence += (p+4);
+            updatePrece(p, res, 4);
             return res;
         }
         return lhs;
     }
+
+    private void updatePrece(int p, BinOp res, int i) {
+         res.precedence += (p + i);
+    }
+
     private Expr parseRelation(int p){
         Expr lhs = parseTerm(p);
         if (accept(TokenClass.PLUS, TokenClass.MINUS)){
@@ -623,13 +580,13 @@ public class Parser {
             nextToken();
             Expr rhs = parseRelation(p);
             BinOp res = new BinOp(lhs,op,rhs);
-            res.precedence += (p+5);
+            updatePrece(p, res, 5);
             return res;
         }
         return lhs;
     }
     private Expr parseTerm(int p){
-        Expr lhs = parseFactor();
+        Expr lhs = parseFactor(p);
         if (accept(TokenClass.ASTERIX,TokenClass.DIV, TokenClass.REM)){
             Op op;
             if (accept(TokenClass.ASTERIX))
@@ -641,19 +598,20 @@ public class Parser {
             nextToken();
             Expr rhs = parseTerm(p);
             BinOp res = new BinOp(lhs,op,rhs);
-            res.precedence += (p+6);
+            updatePrece(p, res, 6);
+
             return res;
         }
         return lhs;
     }
-    private Expr parseFactor(){
+    private Expr parseFactor(int p){
         if (accept(TokenClass.LPAR)
                 && !lookAhead(1).tokenClass.equals(TokenClass.INT)
                 && !lookAhead(1).tokenClass.equals(TokenClass.CHAR)
                 && !lookAhead(1).tokenClass.equals(TokenClass.VOID)
                 && !lookAhead(1).tokenClass.equals(TokenClass.STRUCT)){
             nextToken();
-            Expr e = parseExp();
+            Expr e = parseArithmetic(p+8);
             if (e instanceof BinOp)
                 ((BinOp) e).precedence += 8;
             expect(TokenClass.RPAR);
@@ -668,7 +626,7 @@ public class Parser {
             return new VarExpr(t.data);
 
         }
-        else return null;
+        else return parseExp();
     }
 
     private Expr parseExprStar(Expr expr){
@@ -710,6 +668,7 @@ public class Parser {
                 else if (t.tokenClass == TokenClass.REM) op = Op.MOD;
                 else op = Op.ADD;
                 Expr rhs = parseExp();
+                rhs = leftAssociate(rhs);
                 newExpr = new BinOp(expr, op, rhs);
             }
             return parseExprStar(newExpr);
@@ -731,137 +690,4 @@ public class Parser {
         expect(TokenClass.RPAR);
         return new FunCallExpr(name.data,exps);
     }
-
-//
-//    private void parseStructType(){
-//        expect(TokenClass.STRUCT);
-//        expect(TokenClass.IDENTIFIER);
-//    }
-//
-//    private void parseType(){
-//        if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID)) nextToken();
-//        else if (accept(TokenClass.STRUCT)) parseStructType();
-//        else {
-//            error(token.tokenClass);
-//            if (!accept(TokenClass.RBRA))nextToken();
-//            return;
-//        }
-//        if (accept(TokenClass.ASTERIX)){
-//            nextToken();
-//        }
-//    }
-//
-//
-//
-//    private void parseStatement(){
-//        if(accept(TokenClass.LBRA)){
-//            parseBlock();
-//        }
-//        else if (accept(TokenClass.WHILE, TokenClass.IF)){
-//            TokenClass cur = expect(TokenClass.WHILE, TokenClass.IF).tokenClass;
-//            expect(TokenClass.LPAR);
-//            parseExp();
-//            expect(TokenClass.RPAR);
-//            parseStatement();
-//            if (cur.equals(TokenClass.IF) && accept(TokenClass.ELSE)){
-//                nextToken();
-//                parseStatement();
-//            }
-//        }
-//
-//        else if (accept(TokenClass.RETURN)){
-//            nextToken();
-//            if (accept(TokenClass.SC)){
-//                nextToken();
-//            }
-//            else {
-//                parseExp();
-//                expect(TokenClass.SC);
-//            }
-//        }
-//        //exp "=" exp ";"   |    exp ";"
-//        else {
-////            if(accept(TokenClass.IDENTIFIER) && lookAhead(1).tokenClass.equals(TokenClass.LPAR)){
-////                parseFunCall();
-////                expect(TokenClass.SC);
-////            }
-////            else {
-//            parseExp();
-//            if (accept(TokenClass.ASSIGN)){
-//                nextToken();
-//                parseExp();
-//                expect(TokenClass.SC);
-//            }
-//            else {
-//                error(token.tokenClass);
-//                if(!accept(TokenClass.RBRA)) nextToken();
-//            }
-//        }
-//    }
-//}
-//
-//
-//
-//    private void parseFunCall(){
-//        expect(TokenClass.IDENTIFIER);
-//        expect(TokenClass.LPAR);
-//        if (!accept(TokenClass.RPAR)){
-//            parseExp();
-//            parseArgRep();
-//        }
-//        expect(TokenClass.RPAR);
-//
-//    }
-//
-//    private void parseArgRep(){
-//        if (accept(TokenClass.COMMA)){
-//            nextToken();
-//            parseExp();
-//            parseArgRep();
-//        }
-//    }
-//
-//    private void parseFunDecls() {
-//        // to be completed ...
-//        expect(TokenClass.IDENTIFIER);
-//        expect(TokenClass.LPAR);
-//        parseParameter();
-//        expect(TokenClass.RPAR);
-//        parseBlock();
-//
-//    }
-//
-//    private void parseParameter(){
-//        if (accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT)) {
-//            parseType();
-//            expect(TokenClass.IDENTIFIER);
-//            parseArgs();
-//        }
-//    }
-//    private void parseArgs(){
-//        if (accept(TokenClass.COMMA)){
-//            nextToken();
-//            parseType();
-//            expect(TokenClass.IDENTIFIER);
-//            parseArgs();
-//        }
-//    }
-//
-//
-//    private void parseBlock() {
-//        if (accept(TokenClass.LBRA)){
-//            nextToken();
-//            while (!accept(TokenClass.RBRA,TokenClass.EOF)){
-//                if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT))
-//                {
-//                    parseType();
-//                    OneVarDecls();
-//                }
-//                else
-//                    parseStatement();
-//            }
-//            expect(TokenClass.RBRA);
-//        }
-//    }
-
 }
