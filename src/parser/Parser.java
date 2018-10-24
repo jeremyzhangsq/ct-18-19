@@ -386,15 +386,16 @@ public class Parser {
         Expr expr;
         if(accept(TokenClass.LPAR)){
             int precedence = 0;
-            expr = parseArithmetic(precedence);
-            if (expr == null)
+            TokenClass tc = lookAhead(1).tokenClass;
+            if(tc.equals(TokenClass.INT)||tc.equals(TokenClass.CHAR)
+                    ||tc.equals(TokenClass.VOID) ||tc.equals(TokenClass.STRUCT)){
                 nextToken();
-            if(accept(TokenClass.INT,TokenClass.CHAR,TokenClass.VOID, TokenClass.STRUCT)){
                 Type t = parseType();
                 expect(TokenClass.RPAR);
                 Expr e = parseExp();
                 expr = new TypecastExpr(t,e);
             }
+            else expr = parseArithmetic(precedence);
         }
         else if(accept(TokenClass.CHAR_LITERAL)){
             Token t = expect(TokenClass.CHAR_LITERAL);
