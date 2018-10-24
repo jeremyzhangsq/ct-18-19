@@ -108,8 +108,8 @@ public class Parser {
     }
 
     /*
-    * Returns true if the current token is equals to any of the expected ones.
-    */
+     * Returns true if the current token is equals to any of the expected ones.
+     */
     private boolean accept(TokenClass... expected) {
         boolean result = false;
         for (TokenClass e : expected)
@@ -331,7 +331,7 @@ public class Parser {
         else if (accept(TokenClass.WHILE, TokenClass.IF)){
             TokenClass cur = expect(TokenClass.WHILE, TokenClass.IF).tokenClass;
             expect(TokenClass.LPAR);
-            Expr e = parseExp(0);
+            Expr e = parseExp();
             e = leftAssociate(e);
             expect(TokenClass.RPAR);
             Stmt st = parseStatement();
@@ -353,18 +353,18 @@ public class Parser {
                 return new Return();
             }
             else {
-                Expr e = parseExp(0);
+                Expr e = parseExp();
                 e = leftAssociate(e);
                 expect(TokenClass.SC);
                 return new Return(e);
             }
         }
         else {
-            Expr e1 = parseExp(0);
+            Expr e1 = parseExp();
             e1 = leftAssociate(e1);
             if (accept(TokenClass.ASSIGN)){
                 nextToken();
-                Expr e2 = parseExp(0);
+                Expr e2 = parseExp();
                 e2 = leftAssociate(e2);
                 expect(TokenClass.SC);
                 return new Assign(e1,e2);
@@ -381,29 +381,29 @@ public class Parser {
         }
     }
 
-    private Expr parseExp(int p){
+    private Expr parseExp(){
         Token ahead;
         Expr expr;
         if(accept(TokenClass.LPAR)){
+            int precedence = 0;
             TokenClass tc = lookAhead(1).tokenClass;
             if(tc.equals(TokenClass.INT)||tc.equals(TokenClass.CHAR)
                     ||tc.equals(TokenClass.VOID) ||tc.equals(TokenClass.STRUCT)){
                 nextToken();
                 Type t = parseType();
                 expect(TokenClass.RPAR);
-                Expr e = parseExp(p);
+                Expr e = parseExp();
                 expr = new TypecastExpr(t,e);
             }
-            else {
-                expr = parseArithmetic(p);
-            }
+            else expr = parseArithmetic(precedence);
         }
         else if(accept(TokenClass.CHAR_LITERAL)){
             Token t = expect(TokenClass.CHAR_LITERAL);
             expr = new ChrLiteral(t.data.charAt(0));
         }
         else if(accept(TokenClass.INT_LITERAL)) {
-            expr = parseArithmetic(p);
+            int precedence = 0;
+            expr = parseArithmetic(precedence);
         }
         else if(accept(TokenClass.STRING_LITERAL)) {
             Token t = expect(TokenClass.STRING_LITERAL);
@@ -416,7 +416,8 @@ public class Parser {
             }
             else {
 //                Token t = expect(TokenClass.IDENTIFIER);
-                expr = parseArithmetic(p);
+                int precedence = 0;
+                expr = parseArithmetic(precedence);
 
             }
         }
@@ -429,12 +430,12 @@ public class Parser {
         }
         else if (accept(TokenClass.ASTERIX)){
             nextToken();
-            Expr e = parseExp(p);
+            Expr e = parseExp();
             expr = new ValueAtExpr(e);
         }
         else if (accept(TokenClass.MINUS)) {
             nextToken();
-            Expr e = parseExp(p);
+            Expr e = parseExp();
             expr = parseUniary(e);
         }
         else {
@@ -443,7 +444,7 @@ public class Parser {
             return null;
         }
 
-        return parseExprStar(expr, p);
+        return parseExprStar(expr);
 
     }
     private Expr parseUniary(Expr e){
@@ -556,7 +557,7 @@ public class Parser {
     }
 
     private void updatePrece(int p, BinOp res, int i) {
-         res.precedence += (p + i);
+        res.precedence += (p + i);
     }
 
     private Expr parseRelation(int p){
@@ -601,7 +602,7 @@ public class Parser {
                 && !lookAhead(1).tokenClass.equals(TokenClass.VOID)
                 && !lookAhead(1).tokenClass.equals(TokenClass.STRUCT)){
             nextToken();
-            Expr e = parseExp(p+8);
+            Expr e = parseArithmetic(p+8);
 //            if (e instanceof BinOp)
 //                ((BinOp) e).precedence += 8;
             expect(TokenClass.RPAR);
@@ -617,16 +618,16 @@ public class Parser {
         }
         else if (accept(TokenClass.MINUS)) {
             Token t = expect(TokenClass.MINUS);
-            Expr e = parseExp(p);
+            Expr e = parseExp();
             Expr expr = parseUniary(e);
             if (expr instanceof BinOp)
                 ((BinOp) expr).precedence += p;
             return expr;
         }
-        else return parseExp(p);
+        else return parseExp();
     }
 
-    private Expr parseExprStar(Expr expr, int p){
+    private Expr parseExprStar(Expr expr){
         Expr newExpr;
         if(accept(TokenClass.PLUS,TokenClass.DIV,TokenClass.MINUS,
                 TokenClass.ASTERIX,TokenClass.GT,TokenClass.GE,TokenClass.LE,
@@ -634,8 +635,7 @@ public class Parser {
                 TokenClass.AND,TokenClass.REM,TokenClass.LSBR,TokenClass.DOT )){
             if (accept(TokenClass.LSBR)){
                 nextToken();
-                Expr e = parseExp(p);
-                e = leftAssociate(e);
+                Expr e = parseExp();
                 expect(TokenClass.RSBR);
                 newExpr = new ArrayAccessExpr(expr, e);
 
@@ -651,66 +651,25 @@ public class Parser {
                         TokenClass.LT,TokenClass.NE,TokenClass.EQ,TokenClass.OR,
                         TokenClass.AND,TokenClass.REM);
                 Op op;
-                int prece = 0;
-                if (t.tokenClass == TokenClass.PLUS){
-                    op = Op.ADD;
-                    prece = 5;
-                }
-                else if (t.tokenClass == TokenClass.MINUS) {
-                    op = Op.SUB;
-                    prece = 5;
-                }
-                else if (t.tokenClass == TokenClass.ASTERIX) {
-                    op = Op.MUL;
-                    prece = 6;
-                }
-                else if (t.tokenClass == TokenClass.DIV) {
-                    op = Op.DIV;
-                    prece = 6;
-                }
-                else if (t.tokenClass == TokenClass.REM) {
-                    op = Op.MOD;
-                    prece = 6;
-                }
-                else if (t.tokenClass == TokenClass.GT) {
-                    op = Op.GT;
-                    prece = 4;
-                }
-                else if (t.tokenClass == TokenClass.GE) {
-                    op = Op.GE;
-                    prece = 4;
-                }
-                else if (t.tokenClass == TokenClass.LE) {
-                    op = Op.LE;
-                    prece = 4;
-                }
-                else if (t.tokenClass == TokenClass.LT) {
-                    op = Op.LT;
-                    prece = 4;
-                }
-                else if (t.tokenClass == TokenClass.NE) {
-                    op = Op.NE;
-                    prece = 3;
-                }
-                else if (t.tokenClass == TokenClass.EQ) {
-                    op = Op.EQ;
-                    prece = 3;
-                }
-                else if (t.tokenClass == TokenClass.AND) {
-                    op = Op.AND;
-                    prece = 2;
-                }
-                else if (t.tokenClass == TokenClass.OR) {
-                    op = Op.OR;
-                    prece = 1;
-                }
+                if (t.tokenClass == TokenClass.PLUS)  op = Op.ADD;
+                else if (t.tokenClass == TokenClass.MINUS) op = Op.SUB;
+                else if (t.tokenClass == TokenClass.ASTERIX) op = Op.MUL;
+                else if (t.tokenClass == TokenClass.DIV) op = Op.DIV;
+                else if (t.tokenClass == TokenClass.GT) op = Op.GT;
+                else if (t.tokenClass == TokenClass.GE) op = Op.GE;
+                else if (t.tokenClass == TokenClass.LE) op = Op.LE;
+                else if (t.tokenClass == TokenClass.LT) op = Op.LT;
+                else if (t.tokenClass == TokenClass.NE) op = Op.NE;
+                else if (t.tokenClass == TokenClass.EQ) op = Op.EQ;
+                else if (t.tokenClass == TokenClass.OR) op = Op.OR;
+                else if (t.tokenClass == TokenClass.AND) op = Op.AND;
+                else if (t.tokenClass == TokenClass.REM) op = Op.MOD;
                 else op = Op.ADD;
-                Expr rhs = parseExp(p);
+                Expr rhs = parseExp();
                 rhs = leftAssociate(rhs);
                 newExpr = new BinOp(expr, op, rhs);
-                ((BinOp) newExpr).precedence += (prece+p);
             }
-            return parseExprStar(newExpr,p);
+            return parseExprStar(newExpr);
         }
         return expr;
     }
@@ -720,10 +679,10 @@ public class Parser {
         List<Expr> exps = new ArrayList<>();
         expect(TokenClass.LPAR);
         if (!accept(TokenClass.RPAR)){
-            exps.add(parseExp(0));
+            exps.add(parseExp());
             while (accept(TokenClass.COMMA)){
                 nextToken();
-                exps.add(parseExp(0));
+                exps.add(parseExp());
             }
         }
         expect(TokenClass.RPAR);
