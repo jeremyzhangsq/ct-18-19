@@ -10,5 +10,6 @@ int main(){
     return c.d;
     return (int) a;
     return a;
-
+    return -func()[10].b;
+    return stu.a.b.c[10];
 }

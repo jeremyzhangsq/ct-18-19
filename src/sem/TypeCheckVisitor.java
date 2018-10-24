@@ -71,8 +71,11 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
     }
     @Override
     public Type visitFunDecl(FunDecl p) {
-	    for (VarDecl vd : p.params)
-	        vd.accept(this);
+	    if (p.params != null){
+            for (VarDecl vd : p.params) {
+                vd.accept(this);
+            }
+        }
 	    Block b = p.block;
 	    if (b.vars == null)
 	    	return null;
