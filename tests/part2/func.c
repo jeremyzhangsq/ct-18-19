@@ -1,4 +1,10 @@
-
-int a(int a, char c, struct s arr[10]){
-    return b(c,d(),e[10],1);
+void b(int a, int b[10], char* c){
+    return;
+}
+void a(){
+    int a;
+    a = 10;
+    int d[20];
+    char* c;
+    return b(a,d,c);
 }

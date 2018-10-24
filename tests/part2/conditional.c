@@ -1,12 +1,12 @@
 int a;
 int main(){
-    if(a){
+    if('a'){
         char a;
         a = 'b';
     }
-    while (b < 10){
-        int a;
-        a = 20;
-    }
+//    while (b < 10){
+//        int a;
+//        a = 20;
+//    }
 }
 

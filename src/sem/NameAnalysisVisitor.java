@@ -171,8 +171,9 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
         else
             fce.fd = ((FuncSymbol) fd).fd;
         if (fce.params!=null){
-            for (Expr e:fce.params)
+            for (Expr e:fce.params){
                 e.accept(this);
+            }
         }
         return null;
 	}

@@ -61,8 +61,11 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	    else if ((a instanceof PointerType || a instanceof ArrayType)
                 && (b instanceof PointerType || b instanceof ArrayType)){
 	        if (a.getClass() == b.getClass()){
-                if (a instanceof ArrayType)
-                    return isEqual(((ArrayType) a).type, ((ArrayType) b).type);
+                if (a instanceof ArrayType){
+                    if (((ArrayType) a).arrSize == ((ArrayType)b).arrSize)
+                        return isEqual(((ArrayType) a).type, ((ArrayType) b).type);
+                }
+
                 else
                     return isEqual(((PointerType)a).type, ((PointerType) b).type);
             }
