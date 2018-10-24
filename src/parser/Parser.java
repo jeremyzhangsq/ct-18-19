@@ -395,7 +395,9 @@ public class Parser {
                 Expr e = parseExp();
                 expr = new TypecastExpr(t,e);
             }
-            else expr = parseArithmetic(precedence);
+            else {
+                expr = parseArithmetic(precedence);
+            }
         }
         else if(accept(TokenClass.CHAR_LITERAL)){
             Token t = expect(TokenClass.CHAR_LITERAL);
@@ -602,7 +604,7 @@ public class Parser {
                 && !lookAhead(1).tokenClass.equals(TokenClass.VOID)
                 && !lookAhead(1).tokenClass.equals(TokenClass.STRUCT)){
             nextToken();
-            Expr e = parseArithmetic(p+8);
+            Expr e = parseExp();
 //            if (e instanceof BinOp)
 //                ((BinOp) e).precedence += 8;
             expect(TokenClass.RPAR);
