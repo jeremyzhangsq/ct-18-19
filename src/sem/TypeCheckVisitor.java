@@ -65,7 +65,6 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
                     if (((ArrayType) a).arrSize == ((ArrayType)b).arrSize)
                         return isEqual(((ArrayType) a).type, ((ArrayType) b).type);
                 }
-
                 else
                     return isEqual(((PointerType)a).type, ((PointerType) b).type);
             }
@@ -249,7 +248,7 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 		    if (((VarExpr) fae.structure).std != null){
                 for (VarDecl vd : ((VarExpr) fae.structure).std.vars){
                     if (vd.varName.equals(fae.fieldName))
-                        return t;
+                        return vd.type;
                 }
             }
             error("Non Exist Struct Field:"+fae.fieldName);

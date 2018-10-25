@@ -11,7 +11,7 @@ int main(){
         return a;
     if (a<11)
         return a;
-    if(b<11)
+    if(-a+b < -b || a == 1)
         return b;
     else
         return b;

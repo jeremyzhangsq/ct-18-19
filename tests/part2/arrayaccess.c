@@ -6,7 +6,7 @@ int p(char a){
 }
 int main(){
     char a;
-    a = 'a';
+    a = '\t';
     int c;
     c = arr[p(a)];
     return 0;

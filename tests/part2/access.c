@@ -7,7 +7,8 @@ int main(){
     int a;
     a = as[1].a;
     struct st *n;
-    n = as[1].next;
+    n = (*as[1].next).a;
     as[1].next = *as;
+
 }
 

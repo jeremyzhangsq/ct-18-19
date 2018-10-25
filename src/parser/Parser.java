@@ -399,7 +399,22 @@ public class Parser {
         }
         else if(accept(TokenClass.CHAR_LITERAL)){
             Token t = expect(TokenClass.CHAR_LITERAL);
-            expr = new ChrLiteral(t.data.charAt(0));
+            String d = t.data.substring(1,t.data.length()-1);
+            if (d.length() == 1)
+                expr = new ChrLiteral(d.charAt(0));
+            else{
+                char aa;
+                if (d == "\t") aa = '\t';
+                else if (d == "\b") aa = '\b';
+                else if (d == "\n") aa = '\n';
+                else if (d == "\r") aa = '\r';
+                else if (d == "\f") aa = '\f';
+                else if (d == "\'") aa = '\'';
+                else if (d == "\"") aa = '\"';
+                else if (d == "\\") aa = '\\';
+                else aa = '\0';
+                expr = new ChrLiteral(aa);
+            }
         }
         else if(accept(TokenClass.INT_LITERAL)) {
             int precedence = 0;
@@ -436,6 +451,7 @@ public class Parser {
         else if (accept(TokenClass.MINUS)) {
             nextToken();
             Expr e = parseExp();
+//            e = leftAssociate(e);
             expr = parseUniary(e);
         }
         else {
@@ -596,35 +612,55 @@ public class Parser {
         return lhs;
     }
     private Expr parseFactor(int p){
+        Expr expr;
         if (accept(TokenClass.LPAR)
                 && !lookAhead(1).tokenClass.equals(TokenClass.INT)
                 && !lookAhead(1).tokenClass.equals(TokenClass.CHAR)
                 && !lookAhead(1).tokenClass.equals(TokenClass.VOID)
                 && !lookAhead(1).tokenClass.equals(TokenClass.STRUCT)){
             nextToken();
-            Expr e = parseArithmetic(p+8);
+            expr = parseArithmetic(p+8);
 //            if (e instanceof BinOp)
 //                ((BinOp) e).precedence += 8;
             expect(TokenClass.RPAR);
-            return e;
         }
         else if (accept(TokenClass.INT_LITERAL)){
             Token t = expect(TokenClass.INT_LITERAL);
-            return new IntLiteral(Integer.valueOf(t.data));
+            expr = new IntLiteral(Integer.valueOf(t.data));
         }
         else if (accept(TokenClass.IDENTIFIER)){
-            Token t = expect(TokenClass.IDENTIFIER);
-            return new VarExpr(t.data);
+            Token ahead = lookAhead(1);
+            if(ahead.tokenClass.equals(TokenClass.LPAR)){
+                expr = parseFunCall();
+            }
+            else {
+                Token t = expect(TokenClass.IDENTIFIER);
+                expr =  new VarExpr(t.data);
+            }
         }
         else if (accept(TokenClass.MINUS)) {
             Token t = expect(TokenClass.MINUS);
             Expr e = parseExp();
-            Expr expr = parseUniary(e);
+
+            expr = parseUniary(e);
             if (expr instanceof BinOp)
                 ((BinOp) expr).precedence += p;
-            return expr;
         }
-        else return parseExp();
+        else expr = parseExp();
+        Expr newExpr = expr;
+        if (accept(TokenClass.LSBR)){
+            nextToken();
+            Expr e = parseExp();
+            expect(TokenClass.RSBR);
+            newExpr = new ArrayAccessExpr(expr, e);
+
+        }
+        else if (accept(TokenClass.DOT)){
+            nextToken();
+            Token t = expect(TokenClass.IDENTIFIER);
+            newExpr = new FieldAccessExpr(expr, t.data);
+        }
+        return newExpr;
     }
 
     private Expr parseExprStar(Expr expr){
