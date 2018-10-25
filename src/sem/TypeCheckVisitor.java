@@ -262,6 +262,33 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
             }
             error("Non Exist Struct Field:"+fae.fieldName);
         }
+        if (t instanceof StructType && fae.structure instanceof ArrayAccessExpr
+                && ((ArrayAccessExpr) fae.structure).arr instanceof VarExpr){
+            if (((VarExpr)((ArrayAccessExpr) fae.structure).arr).std != null){
+                for (VarDecl vd : ((VarExpr)((ArrayAccessExpr) fae.structure).arr).std.vars){
+                    if (vd.varName.equals(fae.fieldName)){
+                        fae.type = vd.type;
+                        return vd.type;
+                    }
+
+                }
+            }
+            error("Non Exist Struct Field:"+fae.fieldName);
+        }
+        if (t instanceof StructType && fae.structure instanceof ValueAtExpr
+                && ((ValueAtExpr) fae.structure).val instanceof FieldAccessExpr
+                && ((FieldAccessExpr)(((ValueAtExpr) fae.structure).val)).structure instanceof VarExpr){
+            if (((VarExpr)(((FieldAccessExpr)(((ValueAtExpr) fae.structure).val)).structure)).std != null){
+                for (VarDecl vd : ((VarExpr)(((FieldAccessExpr)(((ValueAtExpr) fae.structure).val)).structure)).std.vars){
+                    if (vd.varName.equals(fae.fieldName)){
+                        fae.type = vd.type;
+                        return vd.type;
+                    }
+
+                }
+            }
+            error("Non Exist Struct Field:"+fae.fieldName);
+        }
 		return null;
 	}
 

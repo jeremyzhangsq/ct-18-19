@@ -200,6 +200,29 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
                     error("Not Declared Struct");
                 }
             }
+            if (v.vd.type instanceof ArrayType){
+                if (((ArrayType)v.vd.type).type instanceof StructType) {
+                    Symbol nvs = scope.lookup(((StructType) ((ArrayType) v.vd.type).type).structName);
+                    if (nvs != null)
+                        v.std = ((StructSymbol) nvs).std;
+                    else {
+                        v.std = null;
+                        error("Not Declared Struct");
+                    }
+                }
+            }
+
+            if (v.vd.type instanceof PointerType){
+                if (((PointerType)v.vd.type).type instanceof StructType) {
+                    Symbol nvs = scope.lookup(((StructType) ((PointerType) v.vd.type).type).structName);
+                    if (nvs != null)
+                        v.std = ((StructSymbol) nvs).std;
+                    else {
+                        v.std = null;
+                        error("Not Declared Struct");
+                    }
+                }
+            }
         }
         return null;
     }

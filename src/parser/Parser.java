@@ -641,7 +641,6 @@ public class Parser {
         else if (accept(TokenClass.MINUS)) {
             Token t = expect(TokenClass.MINUS);
             Expr e = parseExp();
-
             expr = parseUniary(e);
             if (expr instanceof BinOp)
                 ((BinOp) expr).precedence += p;
