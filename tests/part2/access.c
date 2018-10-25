@@ -1,13 +1,13 @@
 struct st{
     int a;
-    struct st next;
+    struct st *next;
 };
 int main(){
-    struct st as[10];
+    struct st as;
     int a;
-    a = as[1].a;
+    a = as.a;
     struct st *n;
-//    a = as[1].next.a;
+//    n = (*(as.next)).a;
 //    as[1].next = *as;
 
 }
