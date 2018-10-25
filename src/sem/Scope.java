@@ -13,7 +13,9 @@ public class Scope {
 	}
 	
 	public Scope() { this(null); }
-	
+	public Scope getOuter(){
+		return outer;
+	}
 	public Symbol lookup(String name) {
 		Symbol cur = lookupCurrent(name);
 		if (cur != null)

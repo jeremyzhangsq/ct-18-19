@@ -50,8 +50,9 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 	}
 
 	private boolean isEqual(Type a, Type b){
-	    if (a instanceof StructType &&  b instanceof StructType)
-	        return a==b;
+	    if (a instanceof StructType &&  b instanceof StructType){
+            return ((StructType) a).structName.equals(((StructType) b).structName);
+        }
 	    else if (a == BaseType.INT && b ==BaseType.INT)
 	        return true;
 	    else if (a == BaseType.VOID && b == BaseType.VOID)
@@ -233,7 +234,6 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
                     aae.type = ((ArrayType) t).type;
                     return ((ArrayType) t).type;
                 }
-
                 else{
                     aae.type = ((PointerType) t).type;
                     return ((PointerType) t).type;

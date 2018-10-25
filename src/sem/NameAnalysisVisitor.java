@@ -192,7 +192,11 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
                 return null;
             }
             if (v.vd.type instanceof StructType){
-                Symbol nvs = scope.lookup(((StructType) v.vd.type).structName);
+                Symbol nvs;
+                if (scope.getOuter()!=null)
+                    nvs = scope.getOuter().lookup(((StructType) v.vd.type).structName);
+                else
+                    nvs = scope.lookup(((StructType) v.vd.type).structName);
                 if (nvs != null)
                     v.std = ((StructSymbol) nvs).std;
                 else {
