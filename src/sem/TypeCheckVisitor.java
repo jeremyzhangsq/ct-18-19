@@ -229,10 +229,16 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
         	return null;
 	    if (t instanceof ArrayType || t instanceof PointerType){
 	        if (idT == BaseType.INT){
-                if (t instanceof ArrayType)
+                if (t instanceof ArrayType){
+                    aae.type = ((ArrayType) t).type;
                     return ((ArrayType) t).type;
-                else
+                }
+
+                else{
+                    aae.type = ((PointerType) t).type;
                     return ((PointerType) t).type;
+                }
+
             }
             else error("Not A Int Index:"+idT);
         }
@@ -247,8 +253,11 @@ public class TypeCheckVisitor extends BaseSemanticVisitor<Type> {
 		if (t instanceof StructType && fae.structure instanceof VarExpr){
 		    if (((VarExpr) fae.structure).std != null){
                 for (VarDecl vd : ((VarExpr) fae.structure).std.vars){
-                    if (vd.varName.equals(fae.fieldName))
+                    if (vd.varName.equals(fae.fieldName)){
+                        fae.type = vd.type;
                         return vd.type;
+                    }
+
                 }
             }
             error("Non Exist Struct Field:"+fae.fieldName);

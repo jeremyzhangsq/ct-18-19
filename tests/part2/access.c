@@ -3,12 +3,12 @@ struct st{
     struct st *next;
 };
 int main(){
-    struct st as[10];
+    struct st as;
     int a;
-    a = as[1].a;
+    a = as.a;
     struct st *n;
-    n = (*as[1].next).a;
-    as[1].next = *as;
+    n = (*(as.next)).a;
+//    as[1].next = *as;
 
 }
 

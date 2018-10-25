@@ -4,6 +4,10 @@ int main(){
     a = 10;
     int b;
     b = 10;
+    int c;
+    c = 10;
+    int d;
+    d = 10;
     if (a+b<c+d && a*c-b != a){
         a = 2;
     }
