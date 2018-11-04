@@ -226,10 +226,11 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 		return null;
 	}
 	public void emit(String command, String result, String lhs, String rhs){
-		if (rhs != null)
-			writer.println(command+"\t"+result+",\t"+lhs+",\t"+rhs);
-		else
+		if (lhs == null && rhs == null)
+			writer.println(command+"\t"+result);
+		else if (rhs == null)
 			writer.println(command+"\t"+result+",\t"+lhs);
-
+		else
+			writer.println(command+"\t"+result+",\t"+lhs+",\t"+rhs);
 	}
 }

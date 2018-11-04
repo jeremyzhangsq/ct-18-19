@@ -21,12 +21,18 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				emit("add",result.toString(),lhsRegister.toString(),rhsRegister.toString());
 				break;
 			case SUB:
+				emit("sub",result.toString(),lhsRegister.toString(),rhsRegister.toString());
 				break;
 			case MUL:
+				emit("mult",result.toString(),lhsRegister.toString(),rhsRegister.toString());
 				break;
 			case DIV:
+				emit("div",result.toString(),lhsRegister.toString(),rhsRegister.toString());
+				emit("mflo",result.toString(),null,null);
 				break;
 			case MOD:
+				emit("div",result.toString(),lhsRegister.toString(),rhsRegister.toString());
+				emit("mfhi",result.toString(),null,null);
 				break;
 			case GT:
 				break;
