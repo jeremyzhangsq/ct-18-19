@@ -15,28 +15,6 @@ public class CodeGenerator {
      * Simple register allocator.
      */
 
-    // contains all the free temporary registers
-    private Stack<Register> freeRegs = new Stack<Register>();
-
-    public CodeGenerator() {
-        freeRegs.addAll(Register.tmpRegs);
-    }
-
-    private class RegisterAllocationError extends Error {}
-
-    private Register getRegister() {
-        try {
-            return freeRegs.pop();
-        } catch (EmptyStackException ese) {
-            throw new RegisterAllocationError(); // no more free registers, bad luck!
-        }
-    }
-
-    private void freeRegister(Register reg) {
-        freeRegs.push(reg);
-    }
-
-
     private PrintWriter writer; // use this writer to output the assembly instructions
 
 

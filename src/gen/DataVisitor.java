@@ -8,12 +8,11 @@ import java.util.Set;
 
 
 public class DataVisitor extends BaseGenVisitor<Integer> {
-    private PrintWriter writer;
     private Program program;
     private Set<String> Strs;
     private Set<Character> Chrs;
     public DataVisitor(PrintWriter writer, Program program){
-        this.writer = writer;
+        super(writer);
         this.program = program;
         Strs = new HashSet<>();
         Chrs = new HashSet<>();

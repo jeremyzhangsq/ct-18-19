@@ -3,8 +3,20 @@ package gen;
 
 import ast.*;
 
+import java.io.PrintWriter;
+import java.util.EmptyStackException;
+import java.util.Stack;
+
 public class BaseGenVisitor<T> implements GenVisitor<T> {
 
+	protected PrintWriter writer;
+	// contains all the free temporary registers
+	protected FreeRegs freeRegs;
+
+	public BaseGenVisitor(PrintWriter writer){
+		this.writer = writer;
+		freeRegs = FreeRegs.getInstance();
+	}
 
 	@Override
 	public T visitBaseType(BaseType bt) {
@@ -66,12 +78,15 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 	@Override
 	public T visitArrayAccessExpr(ArrayAccessExpr aae) {
 		System.out.println("ArrayAccessExpr");
+		aae.arr.accept(this);
+		aae.idx.accept(this);
 		return null;
 	}
 
 	@Override
 	public T visitFieldAccessExpr(FieldAccessExpr fae) {
 		System.out.println("FieldAccessExpr");
+		fae.structure.accept(this);
 		return null;
 	}
 
@@ -145,12 +160,20 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 	@Override
 	public T visitStructTypeDecl(StructTypeDecl st) {
 		System.out.println("StructTypeDecl");
+		if (st.vars != null){
+			for (VarDecl vd : st.vars)
+				vd.accept(this);
+		}
 		return null;
 	}
 
 	@Override
 	public T visitBlock(Block b) {
 		System.out.println("Block");
+		if (b.vars != null){
+			for (VarDecl vd : b.vars)
+				vd.accept(this);
+		}
 		if (b.stmts != null){
 			for (Stmt s: b.stmts)
 				s.accept(this);
@@ -161,6 +184,14 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 	@Override
 	public T visitFunDecl(FunDecl p) {
 		System.out.println("FunDecl");
+		if (p.name.equals("read_c") || p.name.equals("print_c") || p.name.equals("print_i")
+				|| p.name.equals("print_s") || p.name.equals("mcmalloc") || p.name.equals("read_i"))
+			return null;
+		if (p.params != null){
+			for (VarDecl vd : p.params){
+				vd.accept(this);
+			}
+		}
 		p.block.accept(this);
 		return null;
 	}
@@ -168,6 +199,18 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 	@Override
 	public T visitProgram(Program p) {
 		System.out.println("Program");
+		if (p.structTypeDecls != null){
+			for (StructTypeDecl std : p.structTypeDecls)
+				std.accept(this);
+		}
+		if (p.varDecls != null){
+			for (VarDecl vd : p.varDecls)
+				vd.accept(this);
+		}
+		if (p.funDecls != null){
+			for (FunDecl fd : p.funDecls)
+				fd.accept(this);
+		}
 		return null;
 	}
 
@@ -181,5 +224,12 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 	public T visitVarExpr(VarExpr v) {
 		System.out.println("VarExpr");
 		return null;
+	}
+	public void emit(String command, String result, String lhs, String rhs){
+		if (rhs != null)
+			writer.println(command+"\t"+result+",\t"+lhs+",\t"+rhs);
+		else
+			writer.println(command+"\t"+result+",\t"+lhs);
+
 	}
 }
