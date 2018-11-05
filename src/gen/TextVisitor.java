@@ -63,7 +63,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			return null;
 		else if (fce.funcName.equals("print_s")){
 			emit("li",Register.v0.toString(),"4",null);
-			Register param = freeRegs.getParamRegister();
+			Register param = Register.paramRegs[0];
 			Type t = fce.params.get(0).accept(typeCheckVisitor);
 			if (t instanceof PointerType)
 				emit("la",param.toString(),"0("+((PointerType) t).register.toString()+")",null);

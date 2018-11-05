@@ -9,6 +9,7 @@ int main(){
     b = 10;
 //    c = (char*)"Hello World";
 //    print_s(c);
-//    print_s("Hello World");
+    print_s("Hello World");
+//    print_i(b);
     return 0;
 }
