@@ -19,7 +19,12 @@ public class DataVisitor extends BaseGenVisitor<Integer> {
     public Integer visitProgram(Program p) {
         writer.println(".data");
         for (VarDecl vd : p.varDecls) {
-            vd.accept(this);
+            vd.isGlobal = true;
+            writer.print(vd.varName+":");
+            int space = vd.type.accept(this);
+            writer.println(".space "+Integer.toString(space));
+            if (space%4 != 0)
+                writer.println(".align 2");
         }
         for (FunDecl fd : p.funDecls) {
             fd.accept(this);
@@ -27,16 +32,6 @@ public class DataVisitor extends BaseGenVisitor<Integer> {
         return null;
     }
 
-
-    @Override
-    public Integer visitVarDecl(VarDecl vd) {
-        writer.print(vd.varName+":");
-        int space = vd.type.accept(this);
-        writer.println(".space "+Integer.toString(space));
-        if (space%4 != 0)
-            writer.println(".align 2");
-        return null;
-    }
 
     @Override
     public Integer visitBaseType(BaseType bt) {

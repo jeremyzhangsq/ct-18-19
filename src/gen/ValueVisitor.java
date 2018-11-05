@@ -91,8 +91,14 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 	public Register visitVarExpr(VarExpr v) {
 		Register addrRegister = freeRegs.getRegister();
 		Register result = freeRegs.getRegister();
-		emit("la",addrRegister.toString(),v.name,null);
-		emit("lw",result.toString(),"0("+addrRegister.toString()+")",null);
+		String cmd = "lw";
+		if (v.type == BaseType.CHAR)
+		    cmd = "lb";
+		if (v.vd.isGlobal)
+            emit("la",addrRegister.toString(),v.name,null);
+		else
+            emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
+        emit(cmd,result.toString(),"0("+addrRegister.toString()+")",null);
 		freeRegs.freeRegister(addrRegister);
 		return result;
 	}
