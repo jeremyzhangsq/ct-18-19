@@ -99,5 +99,11 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			emit("sw",rhsRegister.toString(),"0("+lhsRegister.toString()+")",null);
 		return null;
 	}
-
+	@Override
+	public Register visitReturn(Return r) {
+		System.out.println("Return");
+		if (r.optionReturn != null)
+			return r.optionReturn.accept(valueVisitor);
+		return null;
+	}
 }

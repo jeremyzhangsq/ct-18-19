@@ -142,7 +142,7 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 	public T visitReturn(Return r) {
 		System.out.println("Return");
 		if (r.optionReturn != null)
-			r.optionReturn.accept(this);
+			return r.optionReturn.accept(this);
 		return null;
 	}
 

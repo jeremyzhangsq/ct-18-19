@@ -1,11 +1,13 @@
 //char a;
-char *c;
-//int b;
+//char *c;
+int a;
+int b;
 int main(){
-//    b = 10;
+    a = 5;
+    b = 10;
 //    a = 'c';
-    c = (char*)"Hello World";
-    print_s(c);
+//    c = (char*)"Hello World";
+//    print_s(c);
 //    print_s("Hello World");
-    return 0;
+    return a<b;
 }

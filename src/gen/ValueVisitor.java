@@ -35,16 +35,22 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				emit("mfhi",result.toString(),null,null);
 				break;
 			case GT:
+				emit("sgt",result.toString(),lhsRegister.toString(),rhsRegister.toString());
 				break;
 			case LT:
+				emit("slt",result.toString(),lhsRegister.toString(),rhsRegister.toString());
 				break;
 			case GE:
+				emit("sge",result.toString(),lhsRegister.toString(),rhsRegister.toString());
 				break;
 			case LE:
+				emit("sle",result.toString(),lhsRegister.toString(),rhsRegister.toString());
 				break;
 			case NE:
+				emit("sne",result.toString(),lhsRegister.toString(),rhsRegister.toString());
 				break;
 			case EQ:
+				emit("seq",result.toString(),lhsRegister.toString(),rhsRegister.toString());
 				break;
 			case OR:
 				break;
