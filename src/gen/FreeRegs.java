@@ -10,7 +10,7 @@ public class FreeRegs {
     private Stack<Register> freeParamRegs = new Stack<Register>();
     protected Map<String,String> Strs;
     protected Map<Character,String> Chrs;
-    protected Map<Expr, Register> Occupied;
+
     public static FreeRegs getInstance() {
         return ourInstance;
     }
@@ -24,7 +24,6 @@ public class FreeRegs {
         freeParamRegs.addAll(tmp);
         Strs = new HashMap<>();
         Chrs = new HashMap<>();
-        Occupied = new HashMap<>();
     }
     private class RegisterAllocationError extends Error {}
 

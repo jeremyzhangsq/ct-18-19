@@ -149,8 +149,35 @@ public class NameAnalysisVisitor extends BaseSemanticVisitor<Void> {
         Symbol s = scope.lookupCurrent(vd.varName);
         if (s !=null)
             error("Existed VarDecl:"+vd.varName);
-        else
+        else{
             scope.put(new VarDeclSymbol(vd));
+            if (vd.type instanceof StructType){
+                Symbol nvs;
+                if (scope.getOuter()!=null)
+                    nvs = scope.getOuter().lookup(((StructType) vd.type).structName);
+                else
+                    nvs = scope.lookup(((StructType) vd.type).structName);
+                if (nvs != null)
+                    vd.std = ((StructSymbol) nvs).std;
+                else {
+                    vd.std = null;
+                    error("Not Declared Struct");
+                }
+            }
+            else if (vd.type instanceof ArrayType && ((ArrayType) vd.type).type instanceof StructType){
+                Symbol nvs;
+                if (scope.getOuter()!=null)
+                    nvs = scope.getOuter().lookup(((StructType) ((ArrayType) vd.type).type).structName);
+                else
+                    nvs = scope.lookup(((StructType) ((ArrayType) vd.type).type).structName);
+                if (nvs != null)
+                    vd.std = ((StructSymbol) nvs).std;
+                else {
+                    vd.std = null;
+                    error("Not Declared Struct");
+                }
+            }
+        }
         return null;
     }
 

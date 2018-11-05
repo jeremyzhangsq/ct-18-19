@@ -4,6 +4,7 @@ import ast.*;
 import sem.TypeCheckVisitor;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 public class TextVisitor extends BaseGenVisitor<Register> {
 
@@ -100,16 +101,57 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			emit("sw",rhsRegister.toString(),"0("+lhsRegister.toString()+")",null);
 		return null;
 	}
+	public int getOffset(List<VarDecl> v){
+		int offset = 0;
+		int size = 0;
+		for (VarDecl vd : v){
+			if (vd.type instanceof ArrayType && ((ArrayType) vd.type).type == BaseType.INT){
+				size = 4*((ArrayType) vd.type).arrSize;
+				offset += size;
+				vd.offset = size;
+			}
+			else if (vd.type instanceof ArrayType && ((ArrayType) vd.type).type == BaseType.CHAR){
+				int s = ((ArrayType) vd.type).arrSize;
+				if (s % 4 == 0){
+					offset += s;
+					vd.offset = s;
+				}
+				else{
+					size = 4*(s/4 + 1);
+					offset += size;
+					vd.offset = size;
+				}
 
+			}
+			else if (vd.type instanceof ArrayType && ((ArrayType) vd.type).type instanceof StructType){
+				size = getOffset(vd.std.vars);
+				size *= ((ArrayType) vd.type).arrSize;
+				offset += size;
+				vd.offset = size;
+			}
+			else if (vd.type instanceof StructType){
+				size = getOffset(vd.std.vars);
+				offset += size;
+				vd.offset = size;
+			}
+			else{
+				offset += 4;
+				vd.offset = 4;
+			}
+		}
+		return offset;
+	}
 	@Override
 	public Register visitBlock(Block b) {
 		if (b.vars != null){
-			int offset = b.vars.size()*4;
+			int offset = getOffset(b.vars);
 			emit("addi",Register.sp.toString(),Register.sp.toString(),Integer.toString(-offset));
+			int minus = 0;
 			for (VarDecl vd : b.vars){
+				minus = vd.offset;
 				vd.offset = offset;
 				vd.isGlobal = false;
-				offset -= 4;
+				offset -= minus;
 			}
 		}
 		if (b.stmts != null){

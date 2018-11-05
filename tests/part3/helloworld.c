@@ -1,15 +1,25 @@
 char a;
-//char *c;
-
-int main(){
+//struct as{
 //    int a;
-    int b;
-//    a = 5;
-    a = 'c';
-    b = 10;
-//    c = (char*)"Hello World";
-//    print_s(c);
-    print_s("Hello World");
-//    print_i(b);
+//    char b;
+//};
+//struct st{
+//    int sta;
+//    char stc[10];
+//    struct as arr[10];
+//};
+//char *c;
+int b;
+int main(){
+    int c;
+    char d;
+//    char arr[10];
+//    struct st ast;
+    a = 'a';
+    b = 3;
+    d = 'd';
+    c = 2;
+    b = b+c;
+    c = b+c;
     return 0;
 }

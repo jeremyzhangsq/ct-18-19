@@ -19,7 +19,6 @@ public class AddrVisitor extends BaseGenVisitor<Register>{
 			emit("la",addrRegister.toString(),v.name,null);
 		else
 			emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
-		freeRegs.Occupied.put(v,addrRegister);
 		return addrRegister;
 	}
 

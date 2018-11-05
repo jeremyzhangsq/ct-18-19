@@ -5,6 +5,7 @@ public class VarDecl implements ASTNode {
     public final String varName;
     public int offset;
     public boolean isGlobal;
+    public StructTypeDecl std;
     public VarDecl(Type type, String varName) {
 	    this.type = type;
 	    this.varName = varName;
