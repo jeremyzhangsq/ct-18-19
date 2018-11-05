@@ -4,7 +4,8 @@ char *c;
 int main(){
 //    b = 10;
 //    a = 'c';
-    print_s("Hello World");
-//    print_s(c);
+    c = (char*)"Hello World";
+    print_s(c);
+//    print_s("Hello World");
     return 0;
 }

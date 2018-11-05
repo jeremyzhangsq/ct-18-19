@@ -1,6 +1,7 @@
 package gen;
 
 import ast.*;
+import sem.TypeCheckVisitor;
 
 import java.io.PrintWriter;
 
@@ -8,10 +9,12 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 
 	private AddrVisitor addrVisitor;
 	private ValueVisitor valueVisitor;
+	private TypeCheckVisitor typeCheckVisitor;
 	public TextVisitor(PrintWriter writer) {
 		super(writer);
 		addrVisitor = new AddrVisitor(writer);
 		valueVisitor = new ValueVisitor(writer);
+		typeCheckVisitor = new TypeCheckVisitor();
 	}
 
 	@Override
@@ -60,8 +63,12 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			return null;
 		else if (fce.funcName.equals("print_s")){
 			emit("li",Register.v0.toString(),"4",null);
-			if (fce.params.get(0) instanceof StrLiteral)
+			Type t = fce.params.get(0).accept(typeCheckVisitor);
+			if (t instanceof PointerType)
+				emit("la",Register.paramRegs[0].toString(),"0("+((PointerType) t).register.toString()+")",null);
+			else
 				emit("la",Register.paramRegs[0].toString(),freeRegs.Strs.get(((StrLiteral) fce.params.get(0)).val),null);
+
 			writer.println("syscall");
 			return null;
 		}
@@ -80,7 +87,16 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 	public Register visitAssign(Assign a) {
 		Register lhsRegister = a.lhs.accept(addrVisitor);
 		Register rhsRegister = a.rhs.accept(valueVisitor);
-		emit("sw",rhsRegister.toString(),"0("+lhsRegister.toString()+")",null);
+		Type lhs = a.lhs.accept(typeCheckVisitor);
+		if (lhs instanceof PointerType)
+			((PointerType) lhs).register = rhsRegister;
+		Type rhs = a.rhs.accept(typeCheckVisitor);
+		if (rhs == BaseType.CHAR)
+			emit("sb",rhsRegister.toString(),"0("+lhsRegister.toString()+")",null);
+		else if (rhs instanceof PointerType)
+			emit("sw",rhsRegister.toString(),"0("+lhsRegister.toString()+")",null);
+		else
+			emit("sw",rhsRegister.toString(),"0("+lhsRegister.toString()+")",null);
 		return null;
 	}
 
