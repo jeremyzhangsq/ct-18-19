@@ -101,6 +101,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			emit("sw",rhsRegister.toString(),"0("+lhsRegister.toString()+")",null);
 		return null;
 	}
+
 	public int getOffset(List<VarDecl> v){
 		int offset = 0;
 		int size = 0;
@@ -121,7 +122,6 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 					offset += size;
 					vd.offset = size;
 				}
-
 			}
 			else if (vd.type instanceof ArrayType && ((ArrayType) vd.type).type instanceof StructType){
 				size = getOffset(vd.std.vars);
@@ -140,6 +140,21 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			}
 		}
 		return offset;
+	}
+
+	@Override
+	public Register visitIf(If i) {
+		Register conRegister = i.condition.accept(valueVisitor);
+		String idx = Integer.toString(freeRegs.getControlIdx());
+		emit("beq",conRegister.toString(),"0","else"+idx);
+		i.stmt.accept(this);
+		emit("j","endif"+idx,null,null);
+		writer.println("else"+idx+":");
+		if (i.elseStmt!=null){
+			i.elseStmt.accept(this);
+		}
+		writer.println("endif"+idx+":");
+		return null;
 	}
 	@Override
 	public Register visitBlock(Block b) {

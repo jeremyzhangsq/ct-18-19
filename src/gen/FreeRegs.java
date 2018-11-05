@@ -8,6 +8,7 @@ public class FreeRegs {
     private static FreeRegs ourInstance = new FreeRegs();
     private Stack<Register> freeRegs = new Stack<Register>();
     private Stack<Register> freeParamRegs = new Stack<Register>();
+    private int controlIdx;
     protected Map<String,String> Strs;
     protected Map<Character,String> Chrs;
 
@@ -24,6 +25,7 @@ public class FreeRegs {
         freeParamRegs.addAll(tmp);
         Strs = new HashMap<>();
         Chrs = new HashMap<>();
+        controlIdx = 0;
     }
     private class RegisterAllocationError extends Error {}
 
@@ -50,4 +52,8 @@ public class FreeRegs {
     protected void freeParamRegister(Register reg) {
         freeParamRegs.push(reg);
     }
+    public int getControlIdx() {
+        return this.controlIdx++;
+    }
+
 }
