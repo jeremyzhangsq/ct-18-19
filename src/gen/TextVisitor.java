@@ -32,8 +32,9 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			return null;
 		else if	(p.name.equals("print_i"))
 			return null;
-		else if (p.name.equals("print_s"))
+		else if (p.name.equals("print_s")){
 			return null;
+		}
 		else if (p.name.equals("mcmalloc"))
 			return null;
 		else if (p.name.equals("read_i"))
@@ -41,11 +42,39 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		else {
 			writer.println(p.name+":");
 			p.block.accept(this);
+			emit("li",Register.v0.toString(),"10",null);
+			writer.println("syscall");
 			return null;
 		}
 
 	}
 
+	@Override
+	public Register visitFunCallExpr(FunCallExpr fce) {
+		//TODO: arugument
+		if (fce.funcName.equals("read_c"))
+			return null;
+		else if (fce.funcName.equals("print_c"))
+			return null;
+		else if	(fce.funcName.equals("print_i"))
+			return null;
+		else if (fce.funcName.equals("print_s")){
+			emit("li",Register.v0.toString(),"4",null);
+			if (fce.params.get(0) instanceof StrLiteral)
+				emit("la",Register.paramRegs[0].toString(),freeRegs.Strs.get(((StrLiteral) fce.params.get(0)).val),null);
+			writer.println("syscall");
+			return null;
+		}
+		else if (fce.funcName.equals("mcmalloc"))
+			return null;
+		else if (fce.funcName.equals("read_i"))
+			return null;
+		else {
+			for (Expr expr: fce.params)
+				expr.accept(this);
+			return null;
+		}
+	}
 
 	@Override
 	public Register visitAssign(Assign a) {

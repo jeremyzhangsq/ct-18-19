@@ -64,6 +64,24 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 	}
 
 	@Override
+	public Register visitChrLiteral(ChrLiteral cl) {
+		Register next = freeRegs.getRegister();
+		if (freeRegs.Chrs.get(cl.val) == null)
+			return null;
+		emit("lb",next.toString(),freeRegs.Chrs.get(cl.val), null);
+		return next;
+	}
+
+	@Override
+	public Register visitStrLiteral(StrLiteral sl) {
+		Register next = freeRegs.getRegister();
+		if (freeRegs.Strs.get(sl.val) == null)
+			return null;
+		emit("la",next.toString(),freeRegs.Strs.get(sl.val), null);
+		return next;
+	}
+
+	@Override
 	public Register visitVarExpr(VarExpr v) {
 		Register addrRegister = freeRegs.getRegister();
 		Register result = freeRegs.getRegister();

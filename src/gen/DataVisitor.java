@@ -9,13 +9,10 @@ import java.util.Set;
 
 public class DataVisitor extends BaseGenVisitor<Integer> {
     private Program program;
-    private Set<String> Strs;
-    private Set<Character> Chrs;
+
     public DataVisitor(PrintWriter writer, Program program){
         super(writer);
         this.program = program;
-        Strs = new HashSet<>();
-        Chrs = new HashSet<>();
     }
 
     @Override
@@ -33,7 +30,7 @@ public class DataVisitor extends BaseGenVisitor<Integer> {
 
     @Override
     public Integer visitVarDecl(VarDecl vd) {
-        writer.println(vd.varName+":");
+        writer.print(vd.varName+":");
         int space = vd.type.accept(this);
         writer.println(".space "+Integer.toString(space));
         if (space%4 != 0)
@@ -80,18 +77,20 @@ public class DataVisitor extends BaseGenVisitor<Integer> {
 
     @Override
     public Integer visitStrLiteral(StrLiteral sl) {
-        if (!Strs.contains(sl.val)){
-            writer.println("str"+Integer.toString(Strs.size())+":\t.asciiz \""+sl.val+"\"");
-            Strs.add(sl.val);
+        if (!freeRegs.Strs.keySet().contains(sl.val)){
+            String key = "str"+Integer.toString(freeRegs.Strs.size());
+            writer.println(key+":\t.asciiz \""+sl.val+"\"");
+            freeRegs.Strs.put(sl.val,key);
         }
         return null;
     }
 
     @Override
     public Integer visitChrLiteral(ChrLiteral cl) {
-        if (!Chrs.contains(cl.val)){
-            writer.println("chr"+Integer.toString(Chrs.size())+":\t.asciiz \'"+cl.val+"\'");
-            Chrs.add(cl.val);
+        if (!freeRegs.Chrs.keySet().contains(cl.val)){
+            String key = "chr"+Integer.toString(freeRegs.Chrs.size());
+            writer.println(key+":\t.byte \'"+cl.val+"\'");
+            freeRegs.Chrs.put(cl.val,key);
         }
         return null;
     }

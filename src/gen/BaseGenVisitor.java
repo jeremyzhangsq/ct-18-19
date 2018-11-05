@@ -4,8 +4,6 @@ package gen;
 import ast.*;
 
 import java.io.PrintWriter;
-import java.util.EmptyStackException;
-import java.util.Stack;
 
 public class BaseGenVisitor<T> implements GenVisitor<T> {
 
@@ -93,15 +91,13 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 	@Override
 	public T visitValueAtExpr(ValueAtExpr vae) {
 		System.out.println("ValueAtExpr");
-		vae.val.accept(this);
-		return null;
+		return vae.val.accept(this);
 	}
 
 	@Override
 	public T visitTypecastExpr(TypecastExpr te) {
 		System.out.println("TypecastExpr");
-		te.expr.accept(this);
-		return null;
+		return te.expr.accept(this);
 	}
 
 	@Override
@@ -129,8 +125,7 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 	@Override
 	public T visitExprStmt(ExprStmt est) {
 		System.out.println("ExprStmt");
-		est.expr.accept(this);
-		return null;
+		return est.expr.accept(this);
 	}
 
 	@Override
