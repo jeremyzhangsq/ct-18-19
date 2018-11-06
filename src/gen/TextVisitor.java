@@ -11,10 +11,10 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 	private AddrVisitor addrVisitor;
 	private ValueVisitor valueVisitor;
 	private TypeCheckVisitor typeCheckVisitor;
-	public TextVisitor(PrintWriter writer) {
+	public TextVisitor(PrintWriter writer, Program program) {
 		super(writer);
-		addrVisitor = new AddrVisitor(writer);
-		valueVisitor = new ValueVisitor(writer);
+		addrVisitor = new AddrVisitor(writer,program);
+		valueVisitor = new ValueVisitor(writer,program);
 		typeCheckVisitor = new TypeCheckVisitor();
 	}
 
@@ -98,8 +98,6 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		Type rhs = a.rhs.accept(typeCheckVisitor);
 		if (rhs == BaseType.CHAR)
 			emit("sb",rhsRegister.toString(),"0("+lhsRegister.toString()+")",null);
-		else if (rhs instanceof PointerType)
-			emit("sw",rhsRegister.toString(),"0("+lhsRegister.toString()+")",null);
 		else
 			emit("sw",rhsRegister.toString(),"0("+lhsRegister.toString()+")",null);
 		return null;

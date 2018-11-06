@@ -22,7 +22,7 @@ public class CodeGenerator {
         writer = new PrintWriter(outputFile);
         ArrayList<GenVisitor> visitors = new ArrayList<GenVisitor>() {{
             add(new DataVisitor(writer,program));
-            add(new TextVisitor(writer));
+            add(new TextVisitor(writer,program));
         }};
         // Apply each visitor to the AST
         for (GenVisitor v : visitors) {

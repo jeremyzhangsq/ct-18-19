@@ -7,10 +7,13 @@ import java.io.PrintWriter;
 public class AddrVisitor extends BaseGenVisitor<Register>{
 
 
-	public AddrVisitor(PrintWriter writer) {
+	private DataVisitor dataVisitor;
+	private ValueVisitor valueVisitor;
+	public AddrVisitor(PrintWriter writer, Program program) {
 		super(writer);
+		valueVisitor = new ValueVisitor(writer,program);
+		dataVisitor = new DataVisitor(writer, program);
 	}
-
 
 	@Override
 	public Register visitVarExpr(VarExpr v) {
@@ -22,5 +25,24 @@ public class AddrVisitor extends BaseGenVisitor<Register>{
 		return addrRegister;
 	}
 
+	@Override
+	public Register visitArrayAccessExpr(ArrayAccessExpr aae) {
+		Register idxRegister = aae.idx.accept(valueVisitor);
+		Register addrRegister = aae.arr.accept(this);
+		Register offset = freeRegs.getRegister();
+		int size = aae.arr.type.accept(dataVisitor);
+		if (aae.arr.type == BaseType.CHAR)
+			emit("li",offset.toString(),"1",null);
+		else
+			emit("li",offset.toString(),"4",null);
+		emit("mult",offset.toString(),idxRegister.toString(),null);
+		emit("mflo",offset.toString(),null,null);
+		emit("li",idxRegister.toString(),Integer.toString(size),null);
+		emit("sub",offset.toString(),idxRegister.toString(),offset.toString());
+		emit("sub",addrRegister.toString(),addrRegister.toString(),offset.toString());
+		freeRegs.freeRegister(idxRegister);
+		freeRegs.freeRegister(offset);
+		return addrRegister;
+	}
 
 }

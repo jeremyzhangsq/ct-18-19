@@ -7,9 +7,10 @@ import java.util.EmptyStackException;
 import java.util.Stack;
 
 public class ValueVisitor extends BaseGenVisitor<Register>{
-
-	public ValueVisitor(PrintWriter writer) {
+	private DataVisitor dataVisitor;
+	public ValueVisitor(PrintWriter writer, Program program) {
 		super(writer);
+		dataVisitor = new DataVisitor(writer, program);
 	}
 	@Override
 	public Register visitBinOp(BinOp bop) {
@@ -24,7 +25,8 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				emit("sub",result.toString(),lhsRegister.toString(),rhsRegister.toString());
 				break;
 			case MUL:
-				emit("mult",result.toString(),lhsRegister.toString(),rhsRegister.toString());
+				emit("mult",lhsRegister.toString(),rhsRegister.toString(),null);
+				emit("mflo",result.toString(),null,null);
 				break;
 			case DIV:
 				emit("div",result.toString(),lhsRegister.toString(),rhsRegister.toString());
@@ -113,10 +115,36 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
             emit("la",addrRegister.toString(),v.name,null);
 		else
             emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
+        if ((v.type instanceof ArrayType))
+            return addrRegister;
+        freeRegs.freeRegister(addrRegister);
         emit(cmd,result.toString(),"0("+addrRegister.toString()+")",null);
-		freeRegs.freeRegister(addrRegister);
 		return result;
 	}
 
-
+	@Override
+	public Register visitArrayAccessExpr(ArrayAccessExpr aae) {
+		Register idxRegister = aae.idx.accept(this);
+		Register addrRegister = aae.arr.accept(this);
+		Register result = freeRegs.getRegister();
+		Register offset = freeRegs.getRegister();
+		int size = aae.arr.type.accept(dataVisitor);
+        if (aae.arr.type == BaseType.CHAR)
+            emit("li",offset.toString(),"1",null);
+        else
+            emit("li",offset.toString(),"4",null);
+		emit("mult",offset.toString(),idxRegister.toString(),null);
+		emit("mflo",offset.toString(),null,null);
+        emit("li",idxRegister.toString(),Integer.toString(size),null);
+        emit("sub",offset.toString(),idxRegister.toString(),offset.toString());
+		emit("sub",addrRegister.toString(),addrRegister.toString(),offset.toString());
+		if (aae.arr.type == BaseType.CHAR)
+			emit("lb",result.toString(),"0("+addrRegister+")",null);
+		else
+			emit("lw",result.toString(),"0("+addrRegister+")",null);
+		freeRegs.freeRegister(idxRegister);
+		freeRegs.freeRegister(addrRegister);
+		freeRegs.freeRegister(offset);
+		return result;
+	}
 }

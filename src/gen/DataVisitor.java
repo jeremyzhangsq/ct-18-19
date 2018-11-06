@@ -89,6 +89,9 @@ public class DataVisitor extends BaseGenVisitor<Integer> {
         }
         return null;
     }
-
+    @Override
+    public Integer visitVarExpr(VarExpr v) {
+        return v.type.accept(this);
+    }
 
 }
