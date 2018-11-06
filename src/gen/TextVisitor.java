@@ -141,7 +141,23 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		}
 		return offset;
 	}
-
+	@Override
+	public Register visitWhile(While w) {
+		String idx;
+		String ai = Integer.toString(freeRegs.getControlIdx());
+		writer.println("while"+ai+":");
+		Register conRegister = w.expr.accept(valueVisitor);
+		if (conRegister.controlIndex == null){
+			idx = Integer.toString(freeRegs.getControlIdx());
+			emit("beq",conRegister.toString(),"0","else"+idx);
+		}
+		else
+			idx = conRegister.controlIndex;
+		w.stmt.accept(this);
+		emit("j","while"+ai,null,null);
+		writer.println("else"+idx+":");
+		return null;
+	}
 	@Override
 	public Register visitIf(If i) {
 		Register conRegister = i.condition.accept(valueVisitor);
@@ -161,6 +177,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		writer.println("endif"+idx+":");
 		return null;
 	}
+
 	@Override
 	public Register visitBlock(Block b) {
 		if (b.vars != null){
@@ -184,8 +201,10 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 	@Override
 	public Register visitReturn(Return r) {
 		System.out.println("Return");
-		if (r.optionReturn != null)
-			return r.optionReturn.accept(valueVisitor);
+		if (r.optionReturn != null){
+			r.optionReturn.accept(valueVisitor);
+//			emit("jr",Register.ra.toString(),null,null);
+		}
 		return null;
 	}
 }
