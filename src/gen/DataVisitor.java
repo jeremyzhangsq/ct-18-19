@@ -3,8 +3,6 @@ package gen;
 import ast.*;
 
 import java.io.PrintWriter;
-import java.util.HashSet;
-import java.util.Set;
 
 
 public class DataVisitor extends BaseGenVisitor<Integer> {
@@ -22,9 +20,9 @@ public class DataVisitor extends BaseGenVisitor<Integer> {
             vd.isGlobal = true;
             writer.print(vd.varName+":");
             int space = vd.type.accept(this);
-            writer.println(".space "+Integer.toString(space));
             if (space%4 != 0)
-                writer.println(".align 2");
+                space = 4*(space/4+1);
+            writer.println(".space "+Integer.toString(space));
         }
         for (FunDecl fd : p.funDecls) {
             fd.accept(this);
@@ -59,7 +57,10 @@ public class DataVisitor extends BaseGenVisitor<Integer> {
         }
         if (std!=null){
             for (VarDecl vd: std.vars)
-                size += vd.type.accept(this);
+                if (vd.type == BaseType.CHAR)
+                    size += 4;
+                else
+                    size += vd.type.accept(this);
         }
         return size;
     }
