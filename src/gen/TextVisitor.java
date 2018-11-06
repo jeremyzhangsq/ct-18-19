@@ -46,8 +46,11 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		else {
 			writer.println(p.name+":");
 			p.block.accept(this);
-			emit("li",Register.v0.toString(),"10",null);
-			writer.println("syscall");
+			if (p.name.equals("main")){
+				emit("li",Register.v0.toString(),"10",null);
+				writer.println("syscall");
+			}
+			else emit("jr",Register.ra.toString(),null,null);
 			return null;
 		}
 
