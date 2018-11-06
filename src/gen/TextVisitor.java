@@ -47,7 +47,10 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			writer.println(p.name+":");
 			p.block.accept(this);
 			if (p.name.equals("main")){
-				emit("li",Register.v0.toString(),"10",null);
+				if (p.type == BaseType.VOID)
+					emit("li",Register.v0.toString(),"10",null);
+				else
+					emit("li",Register.v0.toString(),"17",null);
 				writer.println("syscall");
 			}
 			else emit("jr",Register.ra.toString(),null,null);
@@ -184,12 +187,13 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		if (b.vars != null){
 			int offset = getOffset(b.vars);
 			emit("addi",Register.sp.toString(),Register.sp.toString(),Integer.toString(-offset));
-			int minus = 0;
+			offset = 0;
+			int add = 0;
 			for (VarDecl vd : b.vars){
-				minus = vd.offset;
+				add = vd.offset;
 				vd.offset = offset;
+				offset += add;
 				vd.isGlobal = false;
-				offset -= minus;
 			}
 		}
 		if (b.stmts != null){
@@ -203,7 +207,10 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 	public Register visitReturn(Return r) {
 		System.out.println("Return");
 		if (r.optionReturn != null){
-			r.optionReturn.accept(valueVisitor);
+			Register register = r.optionReturn.accept(valueVisitor);
+			emit("addi",Register.paramRegs[0].toString(),register.toString(),"0");
+			freeRegs.freeRegister(register);
+			return Register.paramRegs[0];
 //			emit("jr",Register.ra.toString(),null,null);
 		}
 		return null;

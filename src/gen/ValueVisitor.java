@@ -115,7 +115,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
             emit("la",addrRegister.toString(),v.name,null);
 		else
             emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
-        if ((v.type instanceof ArrayType))
+        if (v.type instanceof ArrayType || v.type instanceof StructType)
             return addrRegister;
         freeRegs.freeRegister(addrRegister);
         emit(cmd,result.toString(),"0("+addrRegister.toString()+")",null);
@@ -128,16 +128,13 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 		Register addrRegister = aae.arr.accept(this);
 		Register result = freeRegs.getRegister();
 		Register offset = freeRegs.getRegister();
-		int size = aae.arr.type.accept(dataVisitor);
         if (aae.arr.type == BaseType.CHAR)
             emit("li",offset.toString(),"1",null);
         else
             emit("li",offset.toString(),"4",null);
 		emit("mult",offset.toString(),idxRegister.toString(),null);
 		emit("mflo",offset.toString(),null,null);
-        emit("li",idxRegister.toString(),Integer.toString(size),null);
-        emit("sub",offset.toString(),idxRegister.toString(),offset.toString());
-		emit("sub",addrRegister.toString(),addrRegister.toString(),offset.toString());
+		emit("add",addrRegister.toString(),addrRegister.toString(),offset.toString());
 		if (aae.arr.type == BaseType.CHAR)
 			emit("lb",result.toString(),"0("+addrRegister+")",null);
 		else
@@ -147,4 +144,36 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 		freeRegs.freeRegister(offset);
 		return result;
 	}
+    @Override
+    public Register visitFieldAccessExpr(FieldAccessExpr fae) {
+        Register result = freeRegs.getRegister();
+        Register addrRegister= fae.structure.accept(this);
+        if (fae.structure instanceof VarExpr){
+            int offset = 0;
+            int size = 0;
+            Type t = null;
+//            for (VarDecl vd: ((VarExpr) fae.structure).std.vars){
+//                size += vd.offset;
+//            }
+            for (VarDecl vd: ((VarExpr) fae.structure).std.vars){
+                if (!vd.varName.equals(fae.fieldName))
+                    offset += vd.offset;
+                else {
+                    t = vd.type;
+                    break;
+                }
+            }
+//            offset = size - offset;
+            emit("add",addrRegister.toString(),addrRegister.toString(),Integer.toString(offset));
+            if (t == BaseType.CHAR)
+                emit("lb",result.toString(),"0("+addrRegister+")",null);
+            else
+                emit("lw",result.toString(),"0("+addrRegister+")",null);
+        }
+        else {
+            writer.println("error");
+        }
+        freeRegs.freeRegister(addrRegister);
+        return result;
+    }
 }
