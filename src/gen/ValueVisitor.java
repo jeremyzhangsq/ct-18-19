@@ -53,8 +53,23 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				emit("seq",result.toString(),lhsRegister.toString(),rhsRegister.toString());
 				break;
 			case OR:
+				freeRegs.freeRegister(result);
+				result = lhsRegister;
+				if (lhsRegister.controlIndex == null){
+					lhsRegister.controlIndex = Integer.toString(freeRegs.getControlIdx());
+				}
+				emit("beq",lhsRegister.toString(),"1","if"+lhsRegister.controlIndex);
+				emit("beq",rhsRegister.toString(),"0","else"+lhsRegister.controlIndex);
+				writer.println("if"+lhsRegister.controlIndex+":");
 				break;
 			case AND:
+				freeRegs.freeRegister(result);
+				result = lhsRegister;
+				if (lhsRegister.controlIndex == null){
+					lhsRegister.controlIndex = Integer.toString(freeRegs.getControlIdx());
+				}
+				emit("beq",lhsRegister.toString(),"0","else"+lhsRegister.controlIndex);
+				emit("beq",rhsRegister.toString(),"0","else"+lhsRegister.controlIndex);
 				break;
 		}
 		freeRegs.freeRegister(lhsRegister);

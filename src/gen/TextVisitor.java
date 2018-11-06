@@ -145,8 +145,13 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 	@Override
 	public Register visitIf(If i) {
 		Register conRegister = i.condition.accept(valueVisitor);
-		String idx = Integer.toString(freeRegs.getControlIdx());
-		emit("beq",conRegister.toString(),"0","else"+idx);
+		String idx;
+		if (conRegister.controlIndex == null){
+			idx = Integer.toString(freeRegs.getControlIdx());
+			emit("beq",conRegister.toString(),"0","else"+idx);
+		}
+		else
+			idx = conRegister.controlIndex;
 		i.stmt.accept(this);
 		emit("j","endif"+idx,null,null);
 		writer.println("else"+idx+":");

@@ -38,11 +38,12 @@ public class Register {
 
     private final int num;      // register number
     private final String name;  // register name
-
+    protected String controlIndex;
 
     private Register(int num, String name) {
         this.num = num;
         this.name = name;
+        this.controlIndex = null;
     }
 
     public String toString() {
