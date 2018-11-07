@@ -8,6 +8,7 @@ public class FreeRegs {
     private static FreeRegs ourInstance = new FreeRegs();
     private Stack<Register> freeRegs = new Stack<Register>();
     private Stack<Register> freeParamRegs = new Stack<Register>();
+    private List<Register> occupyRegs = new ArrayList<>();
     private int controlIdx;
     protected Map<String,String> Strs;
     protected Map<Character,String> Chrs;
@@ -19,9 +20,7 @@ public class FreeRegs {
     private FreeRegs() {
         freeRegs.addAll(Register.tmpRegs);
         List<Register> tmp = new ArrayList<>();
-        for (Register r : Register.paramRegs){
-            tmp.add(r);
-        }
+        tmp.addAll(Arrays.asList(Register.paramRegs));
         freeParamRegs.addAll(tmp);
         Strs = new HashMap<>();
         Chrs = new HashMap<>();
@@ -31,7 +30,9 @@ public class FreeRegs {
 
     protected Register getRegister() {
         try {
-            return freeRegs.pop();
+            Register r = freeRegs.pop();
+            occupyRegs.add(r);
+            return r;
         } catch (EmptyStackException ese) {
             throw new RegisterAllocationError(); // no more free registers, bad luck!
 //			throw new Error();
@@ -39,8 +40,13 @@ public class FreeRegs {
     }
     protected void freeRegister(Register reg) {
         freeRegs.push(reg);
+        occupyRegs.remove(reg);
     }
-
+    protected List<Register> getOccupyRegs(){
+        List<Register> a = new ArrayList<Register>();
+        a.addAll(this.occupyRegs);
+        return a;
+    }
     protected Register getParamRegister() {
         try {
             return freeParamRegs.pop();
@@ -52,6 +58,7 @@ public class FreeRegs {
     protected void freeParamRegister(Register reg) {
         freeParamRegs.push(reg);
     }
+
     public int getControlIdx() {
         return this.controlIdx++;
     }

@@ -1,16 +1,18 @@
 package gen;
 
 import ast.*;
+import sem.TypeCheckVisitor;
 
 import java.io.PrintWriter;
 import java.util.EmptyStackException;
+import java.util.List;
 import java.util.Stack;
 
 public class ValueVisitor extends BaseGenVisitor<Register>{
-	private DataVisitor dataVisitor;
+	private TypeCheckVisitor typeCheckVisitor;
 	public ValueVisitor(PrintWriter writer, Program program) {
 		super(writer);
-		dataVisitor = new DataVisitor(writer, program);
+		typeCheckVisitor = new TypeCheckVisitor();
 	}
 	@Override
 	public Register visitBinOp(BinOp bop) {
@@ -85,7 +87,97 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 		emit("li",next.toString(),Integer.toString(il.val), null);
 		return next;
 	}
+	@Override
+	public Register visitFunCallExpr(FunCallExpr fce) {
+		//TODO: arugument
+		switch (fce.funcName) {
+			case "read_c": {
+				emit("li", Register.v0.toString(), "12", null);
+				Register register = freeRegs.getRegister();
+				writer.println("syscall");
+				emit("addi", register.toString(), Register.v0.toString(), "0");
+				return register;
+			}
+			case "read_i": {
+				emit("li", Register.v0.toString(), "5", null);
+				Register register = freeRegs.getRegister();
+				writer.println("syscall");
+				emit("addi", register.toString(), Register.v0.toString(), "0");
+				return register;
+			}
+			case "print_c": {
+				emit("li", Register.v0.toString(), "11", null);
+				Register param = Register.paramRegs[0];
+				Expr e = fce.params.get(0);
+				if (e instanceof ChrLiteral)
+					emit("lb", param.toString(), freeRegs.Chrs.get(((ChrLiteral) e).val), null);
+				else if (e instanceof VarExpr) {
+					Register r = e.accept(this);
+					emit("move", param.toString(), r.toString(), null);
+					freeRegs.freeRegister(r);
+				}
 
+				writer.println("syscall");
+				return null;
+			}
+			case "print_i": {
+				emit("li", Register.v0.toString(), "1", null);
+				Register param = Register.paramRegs[0];
+				Expr e = fce.params.get(0);
+				if (e instanceof IntLiteral)
+					emit("li", param.toString(), Integer.toString(((IntLiteral) fce.params.get(0)).val), null);
+				else if (e instanceof VarExpr) {
+					Register r = e.accept(this);
+					emit("move", param.toString(), r.toString(), null);
+					freeRegs.freeRegister(r);
+				}
+				writer.println("syscall");
+				return null;
+			}
+			case "print_s": {
+				emit("li", Register.v0.toString(), "4", null);
+				Register param = Register.paramRegs[0];
+				Type t = fce.params.get(0).accept(typeCheckVisitor);
+				if (t instanceof PointerType && ((PointerType) t).register != null)
+					emit("la", param.toString(), "0(" + ((PointerType) t).register.toString() + ")", null);
+				else
+					emit("la", param.toString(), freeRegs.Strs.get(((StrLiteral) (((TypecastExpr) (fce.params.get(0))).expr)).val), null);
+				writer.println("syscall");
+				return null;
+			}
+			case "mcmalloc":
+				return null;
+			default:
+				List<Register> occupy = storeRegister();
+				for (Expr expr : fce.params)
+					expr.accept(this);
+				emit("jal",fce.funcName,null,null);
+				restoreRegister(occupy);
+				if (fce.fd.type != BaseType.VOID){
+					Register r = freeRegs.getRegister();
+					emit("move", r.toString(), Register.v0.toString(),null);
+					return r;
+				}
+				return null;
+		}
+	}
+	private void restoreRegister(List<Register> occupy) {
+		emit("move", Register.sp.toString(),Register.fp.toString(),null);
+		for (int i = 0;i < occupy.size(); i++) {
+			emit("lw",occupy.get(i).toString(),"0("+Register.sp.toString()+")",null);
+			emit("addi",Register.sp.toString(),Register.sp.toString(),"4");
+		}
+	}
+	private List<Register> storeRegister() {
+		List<Register> occupied = freeRegs.getOccupyRegs();
+		occupied.add(Register.ra);
+		for (int i = occupied.size()-1;i >= 0; i--) {
+			emit("addi",Register.sp.toString(),Register.sp.toString(),"-4");
+			emit("sw",occupied.get(i).toString(),"0("+Register.sp.toString()+")",null);
+		}
+		emit("move",Register.fp.toString(), Register.sp.toString(),null);
+		return occupied;
+	}
 	@Override
 	public Register visitChrLiteral(ChrLiteral cl) {
 		Register next = freeRegs.getRegister();
