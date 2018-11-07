@@ -45,15 +45,21 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			return null;
 		else {
 			writer.println(p.name+":");
-			p.block.accept(this);
+			Register register = p.block.accept(this);
 			if (p.name.equals("main")){
 				if (p.type == BaseType.VOID)
 					emit("li",Register.v0.toString(),"10",null);
-				else
+				else{
+					emit("addi",Register.paramRegs[0].toString(),register.toString(),"0");
 					emit("li",Register.v0.toString(),"17",null);
+				}
 				writer.println("syscall");
 			}
-			else emit("jr",Register.ra.toString(),null,null);
+			else {
+				if (register !=null)
+					emit("addi",Register.v0.toString(),register.toString(),"0");
+				emit("jr",Register.ra.toString(),null,null);
+			}
 			return null;
 		}
 
@@ -62,27 +68,61 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 	@Override
 	public Register visitFunCallExpr(FunCallExpr fce) {
 		//TODO: arugument
-		if (fce.funcName.equals("read_c"))
+		if (fce.funcName.equals("read_c")){
+			emit("li",	Register.v0.toString(), "12",null);
+			Register register = freeRegs.getRegister();
+			writer.println("syscall");
+			emit("addi",register.toString(),Register.v0.toString(),"0");
+			return register;
+		}
+		else if (fce.funcName.equals("read_i")){
+			emit("li",	Register.v0.toString(), "5",null);
+			Register register = freeRegs.getRegister();
+			writer.println("syscall");
+			emit("addi",register.toString(),Register.v0.toString(),"0");
+			return register;
+		}
+		else if (fce.funcName.equals("print_c")){
+			emit("li",Register.v0.toString(),"11",null);
+			Register param = Register.paramRegs[0];
+			Expr e = fce.params.get(0);
+			if ( e instanceof ChrLiteral)
+				emit("lb",param.toString(),freeRegs.Chrs.get(((ChrLiteral) e).val),null);
+			else if (e instanceof VarExpr){
+				Register r = e.accept(valueVisitor);
+				emit("move",param.toString(),r.toString(),null);
+				freeRegs.freeRegister(r);
+			}
+
+			writer.println("syscall");
 			return null;
-		else if (fce.funcName.equals("print_c"))
+		}
+		else if	(fce.funcName.equals("print_i")){
+			emit("li",Register.v0.toString(),"1",null);
+			Register param = Register.paramRegs[0];
+			Expr e = fce.params.get(0);
+			if ( e instanceof IntLiteral)
+				emit("li",param.toString(),Integer.toString(((IntLiteral) fce.params.get(0)).val),null);
+			else if (e instanceof VarExpr){
+				Register r = e.accept(valueVisitor);
+				emit("move",param.toString(),r.toString(),null);
+				freeRegs.freeRegister(r);
+			}
+			writer.println("syscall");
 			return null;
-		else if	(fce.funcName.equals("print_i"))
-			return null;
+		}
 		else if (fce.funcName.equals("print_s")){
 			emit("li",Register.v0.toString(),"4",null);
 			Register param = Register.paramRegs[0];
 			Type t = fce.params.get(0).accept(typeCheckVisitor);
-			if (t instanceof PointerType)
+			if (t instanceof PointerType && ((PointerType) t).register != null)
 				emit("la",param.toString(),"0("+((PointerType) t).register.toString()+")",null);
 			else
-				emit("la",param.toString(),freeRegs.Strs.get(((StrLiteral) fce.params.get(0)).val),null);
+				emit("la",param.toString(),freeRegs.Strs.get(((StrLiteral)(((TypecastExpr)(fce.params.get(0))).expr)).val),null);
 			writer.println("syscall");
-			freeRegs.freeParamRegister(param);
 			return null;
 		}
 		else if (fce.funcName.equals("mcmalloc"))
-			return null;
-		else if (fce.funcName.equals("read_i"))
 			return null;
 		else {
 			for (Expr expr: fce.params)
@@ -99,10 +139,16 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		if (lhs instanceof PointerType)
 			((PointerType) lhs).register = rhsRegister;
 		Type rhs = a.rhs.accept(typeCheckVisitor);
+		if (a.rhs instanceof FunCallExpr &&
+				(((FunCallExpr) a.rhs).funcName.equals("read_i")||((FunCallExpr) a.rhs).funcName.equals("read_c")))
+			rhsRegister = a.rhs.accept(this);
 		if (rhs == BaseType.CHAR)
 			emit("sb",rhsRegister.toString(),"0("+lhsRegister.toString()+")",null);
-		else
+		else{
 			emit("sw",rhsRegister.toString(),"0("+lhsRegister.toString()+")",null);
+		}
+		freeRegs.freeRegister(lhsRegister);
+		freeRegs.freeRegister(rhsRegister);
 		return null;
 	}
 
@@ -196,11 +242,17 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 				vd.isGlobal = false;
 			}
 		}
+		Register register = null;
 		if (b.stmts != null){
-			for (Stmt s: b.stmts)
-				s.accept(this);
+			for (Stmt s: b.stmts){
+				if (s instanceof Return)
+					register = s.accept(this);
+				else
+					s.accept(this);
+			}
+
 		}
-		return null;
+		return register;
 	}
 
 	@Override
@@ -208,9 +260,8 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		System.out.println("Return");
 		if (r.optionReturn != null){
 			Register register = r.optionReturn.accept(valueVisitor);
-			emit("addi",Register.paramRegs[0].toString(),register.toString(),"0");
 			freeRegs.freeRegister(register);
-			return Register.paramRegs[0];
+			return register;
 //			emit("jr",Register.ra.toString(),null,null);
 		}
 		return null;

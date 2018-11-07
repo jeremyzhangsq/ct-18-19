@@ -176,4 +176,11 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
         freeRegs.freeRegister(addrRegister);
         return result;
     }
+//    @Override
+//    public Register visitFunCallExpr(FunCallExpr fce) {
+//        System.out.println("FunCallExpr:"+fce.funcName);
+//        for (Expr expr: fce.params)
+//            expr.accept(this);
+//        return null;
+//    }
 }
