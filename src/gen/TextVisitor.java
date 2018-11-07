@@ -50,7 +50,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 				if (p.type == BaseType.VOID)
 					emit("li", Register.v0.toString(), "10", null);
 				else {
-					emit("addi", Register.paramRegs[0].toString(), register.toString(), "0");
+					emit("move", Register.paramRegs[0].toString(), register.toString(),null);
 					emit("li", Register.v0.toString(), "17", null);
 				}
 				writer.println("syscall");
