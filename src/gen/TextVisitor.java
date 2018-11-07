@@ -57,6 +57,11 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 				return null;
 			default:
 				writer.println(p.name + ":");
+				int cnt = 0;
+				for (VarDecl vd : p.params){
+					vd.paramIdx = cnt;
+					cnt ++;
+				}
 				Register reg = p.block.accept(this);
 				if (reg != null)
 					emit("addi", Register.v0.toString(), reg.toString(), "0");
@@ -169,7 +174,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 
 	@Override
 	public Register visitBlock(Block b) {
-		if (b.vars != null){
+		if (!b.vars.isEmpty()){
 			int offset = getOffset(b.vars);
 			emit("addi",Register.sp.toString(),Register.sp.toString(),Integer.toString(-offset));
 			offset = 0;
@@ -182,7 +187,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			}
 		}
 		Register register = null;
-		if (b.stmts != null){
+		if (!b.stmts.isEmpty()){
 			for (Stmt s: b.stmts){
 				if (s instanceof Return)
 					register = s.accept(this);

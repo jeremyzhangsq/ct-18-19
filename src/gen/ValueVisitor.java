@@ -149,8 +149,15 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				return null;
 			default:
 				List<Register> occupy = storeRegister();
-				for (Expr expr : fce.params)
-					expr.accept(this);
+				int cnt = 0;
+				for (Expr expr : fce.params){
+					if (cnt<4){
+						Register argue = expr.accept(this);
+						emit("move", Register.paramRegs[cnt].toString(), argue.toString(),null);
+						freeRegs.freeRegister(argue);
+						cnt++;
+					}
+				}
 				emit("jal",fce.funcName,null,null);
 				restoreRegister(occupy);
 				if (fce.fd.type != BaseType.VOID){
@@ -205,8 +212,15 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 		    cmd = "lb";
 		if (v.vd.isGlobal)
             emit("la",addrRegister.toString(),v.name,null);
-		else
-            emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
+		else{
+			if (v.vd.paramIdx == -1)
+				emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
+			else {
+				freeRegs.freeRegister(result);
+				return Register.paramRegs[v.vd.paramIdx];
+			}
+		}
+
         if (v.type instanceof ArrayType || v.type instanceof StructType)
             return addrRegister;
         freeRegs.freeRegister(addrRegister);

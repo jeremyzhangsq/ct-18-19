@@ -1,18 +1,13 @@
 
-int foo(){
-    int a;
-    int b;
-    a = 5;
-    b = 4;
+int foo(int a, int b){
     return a+b;
 }
 
 int main(){
-      int a;
+//      int a;
       int b;
-      a = read_i();
-      b = foo();
-      print_i(b);
-      print_i(a);
+//      a = read_i();
+      b = foo(3,4);
+//      print_i(b);
       return 0;
 }
