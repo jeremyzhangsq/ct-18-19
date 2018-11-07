@@ -1,13 +1,19 @@
-
-int foo(int a, int b){
-    return a+b;
+struct s{
+    int first;
+};
+int foo(int a, int d, int c){
+    return a+d+c;
 }
 
 int main(){
-//      int a;
+      int arr;
+      struct s ast;
       int b;
+      arr = 5;
+      ast.first = 10;
 //      a = read_i();
-      b = foo(3,4);
-//      print_i(b);
+      b = foo(1,arr,ast.first);
+//      b = a+b;
+      print_i(b);
       return 0;
 }

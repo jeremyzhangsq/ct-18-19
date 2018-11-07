@@ -36,8 +36,10 @@ public class FreeRegs {
         }
     }
     protected void freeRegister(Register reg) {
-        freeRegs.push(reg);
-        occupyRegs.remove(reg);
+        if (Register.tmpSet.contains(reg.toString())){
+            freeRegs.push(reg);
+            occupyRegs.remove(reg);
+        }
     }
     protected List<Register> getOccupyRegs(){
         List<Register> a = new ArrayList<Register>();

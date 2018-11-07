@@ -86,6 +86,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 		Register next = freeRegs.getRegister();
 		emit("li",next.toString(),Integer.toString(il.val), null);
 		return next;
+
 	}
 	@Override
 	public Register visitFunCallExpr(FunCallExpr fce) {
@@ -151,12 +152,14 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				List<Register> occupy = storeRegister();
 				int cnt = 0;
 				for (Expr expr : fce.params){
+					expr.paramIndex = cnt;
+					expr.paramOffset = occupy.size()*4;
 					if (cnt<4){
 						Register argue = expr.accept(this);
 						emit("move", Register.paramRegs[cnt].toString(), argue.toString(),null);
 						freeRegs.freeRegister(argue);
-						cnt++;
 					}
+					cnt++;
 				}
 				emit("jal",fce.funcName,null,null);
 				restoreRegister(occupy);
@@ -213,12 +216,19 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 		if (v.vd.isGlobal)
             emit("la",addrRegister.toString(),v.name,null);
 		else{
-			if (v.vd.paramIdx == -1)
-				emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
+			if (v.vd.paramIdx == -1){
+				if (v.paramIndex == -1)
+					emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
+				else {
+					emit("la",addrRegister.toString(),v.paramOffset+v.vd.offset+"("+Register.sp.toString()+")",null);
+				}
+			}
 			else {
+				freeRegs.freeRegister(addrRegister);
 				freeRegs.freeRegister(result);
 				return Register.paramRegs[v.vd.paramIdx];
 			}
+
 		}
 
         if (v.type instanceof ArrayType || v.type instanceof StructType)
@@ -230,6 +240,8 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 
 	@Override
 	public Register visitArrayAccessExpr(ArrayAccessExpr aae) {
+		aae.arr.paramOffset = aae.paramOffset;
+		aae.arr.paramIndex = aae.paramIndex;
 		Register idxRegister = aae.idx.accept(this);
 		Register addrRegister = aae.arr.accept(this);
 		Register result = freeRegs.getRegister();
@@ -252,15 +264,14 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 	}
     @Override
     public Register visitFieldAccessExpr(FieldAccessExpr fae) {
+		fae.structure.paramIndex = fae.paramIndex;
+		fae.structure.paramOffset = fae.paramOffset;
         Register result = freeRegs.getRegister();
         Register addrRegister= fae.structure.accept(this);
         if (fae.structure instanceof VarExpr){
             int offset = 0;
             int size = 0;
             Type t = null;
-//            for (VarDecl vd: ((VarExpr) fae.structure).std.vars){
-//                size += vd.offset;
-//            }
             for (VarDecl vd: ((VarExpr) fae.structure).std.vars){
                 if (!vd.varName.equals(fae.fieldName))
                     offset += vd.offset;
@@ -269,7 +280,6 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
                     break;
                 }
             }
-//            offset = size - offset;
             emit("add",addrRegister.toString(),addrRegister.toString(),Integer.toString(offset));
             if (t == BaseType.CHAR)
                 emit("lb",result.toString(),"0("+addrRegister+")",null);
@@ -282,11 +292,4 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
         freeRegs.freeRegister(addrRegister);
         return result;
     }
-//    @Override
-//    public Register visitFunCallExpr(FunCallExpr fce) {
-//        System.out.println("FunCallExpr:"+fce.funcName);
-//        for (Expr expr: fce.params)
-//            expr.accept(this);
-//        return null;
-//    }
 }

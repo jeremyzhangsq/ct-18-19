@@ -29,6 +29,15 @@ public class Register {
         for (int i=24; i<=25; i++)
             tmpRegs.add(new Register(i,"t"+(i-24+8)));
     }
+    public static final List<String> tmpSet = new ArrayList<String>();
+    static {
+        for (int i=8; i<=15; i++)
+            tmpSet.add("$t"+Integer.toString(i-8));
+        for (int i=16; i<=23; i++)
+            tmpSet.add("$s"+Integer.toString(i-16));
+        for (int i=24; i<=25; i++)
+            tmpSet.add("t"+Integer.toString(i-24+8));
+    }
 
     public static final Register gp = new Register(28,"gp");
     public static final Register sp = new Register(29,"sp");
