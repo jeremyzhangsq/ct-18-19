@@ -9,7 +9,10 @@ int foo(){
 
 int main(){
       int a;
+      int b;
       a = read_i();
-      a = foo();
+      b = foo();
+      print_i(b);
+      print_i(a);
       return 0;
 }
