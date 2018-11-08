@@ -1,5 +1,7 @@
 package ast;
 
+import gen.Register;
+
 public class VarDecl implements ASTNode {
     public final Type type;
     public final String varName;
@@ -7,6 +9,7 @@ public class VarDecl implements ASTNode {
     public boolean isGlobal;
     public int paramIdx;
     public StructTypeDecl std;
+    public Register paramRegister = null;
     public VarDecl(Type type, String varName) {
 	    this.type = type;
 	    this.varName = varName;

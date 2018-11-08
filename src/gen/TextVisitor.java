@@ -22,8 +22,8 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 	public Register visitProgram(Program p) {
 		writer.println(".text");
 		writer.println("j main");
-		for (FunDecl fd : p.funDecls) {
-			fd.accept(this);
+		for (int i = p.funDecls.size()-1; i>=0;i--) {
+			p.funDecls.get(i).accept(this);
 		}
 		return null;
 	}

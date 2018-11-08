@@ -82,6 +82,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 		}
 		freeRegs.freeRegister(lhsRegister);
 		freeRegs.freeRegister(rhsRegister);
+//		bop.paramRegister = result;
 		return result;
 	}
 
@@ -89,12 +90,12 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 	public Register visitIntLiteral(IntLiteral il) {
 		Register next = freeRegs.getRegister();
 		emit("li",next.toString(),Integer.toString(il.val), null);
+//		il.paramRegister = next;
 		return next;
 
 	}
 	@Override
 	public Register visitFunCallExpr(FunCallExpr fce) {
-		//TODO: arugument
 		switch (fce.funcName) {
 			case "read_c": {
 				emit("li", Register.v0.toString(), "12", null);
@@ -155,14 +156,27 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 			default:
 				List<Register> occupy = storeRegister();
 				int cnt = 0;
+				int i = 0;
+				int offset = 4*(fce.params.size()-4);
+				Register argue;
 				for (Expr expr : fce.params){
 					expr.paramIndex = cnt;
 					expr.paramOffset = occupy.size()*4;
 					if (cnt<4){
-						Register argue = expr.accept(this);
+						argue = expr.accept(this);
 						emit("move", Register.paramRegs[cnt].toString(), argue.toString(),null);
 						freeRegs.freeRegister(argue);
 					}
+					else {
+//						expr.paramOffset = i-offset;
+						expr.paramOffset += 4;
+						emit("addi",Register.sp.toString(),Register.sp.toString(),"-4");
+						argue = expr.accept(this);
+						emit("sw",argue.toString(),(i-offset)+"("+Register.sp.toString()+")",null);
+
+						i+=4;
+					}
+					fce.fd.params.get(cnt).paramRegister = argue;
 					cnt++;
 				}
 				emit("jal",fce.funcName,null,null);
@@ -170,11 +184,13 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				if (fce.fd.type != BaseType.VOID){
 					Register r = freeRegs.getRegister();
 					emit("move", r.toString(), Register.v0.toString(),null);
+//					fce.paramRegister = r;
 					return r;
 				}
 				return null;
 		}
 	}
+
 	private void restoreRegister(List<Register> occupy) {
 		emit("move", Register.sp.toString(),Register.fp.toString(),null);
 		for (int i = 0;i < occupy.size(); i++) {
@@ -198,6 +214,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 		if (freeRegs.Chrs.get(cl.val) == null)
 			return null;
 		emit("lb",next.toString(),freeRegs.Chrs.get(cl.val), null);
+//		cl.paramRegister = next;
 		return next;
 	}
 
@@ -207,6 +224,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 		if (freeRegs.Strs.get(sl.val) == null)
 			return null;
 		emit("la",next.toString(),freeRegs.Strs.get(sl.val), null);
+//		sl.paramRegister = next;
 		return next;
 	}
 
@@ -224,19 +242,23 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				if (v.paramIndex == -1)
 					emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
 				else {
-					emit("la",addrRegister.toString(),v.paramOffset+v.vd.offset+"("+Register.sp.toString()+")",null);
+						emit("la",addrRegister.toString(),v.paramOffset+v.vd.offset+"("+Register.sp.toString()+")",null);
 				}
 			}
 			else {
 				freeRegs.freeRegister(addrRegister);
 				freeRegs.freeRegister(result);
-				return Register.paramRegs[v.vd.paramIdx];
+				if (v.vd.paramIdx < 4)
+					return Register.paramRegs[v.vd.paramIdx];
+				else
+					return v.vd.paramRegister;
 			}
 
 		}
 
         if (v.type instanceof ArrayType || v.type instanceof StructType)
-            return addrRegister;
+			return addrRegister;
+
         freeRegs.freeRegister(addrRegister);
         emit(cmd,result.toString(),"0("+addrRegister.toString()+")",null);
 		return result;
@@ -264,6 +286,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 		freeRegs.freeRegister(idxRegister);
 		freeRegs.freeRegister(addrRegister);
 		freeRegs.freeRegister(offset);
+//		aae.paramRegister = result;
 		return result;
 	}
     @Override
@@ -294,6 +317,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
             writer.println("error");
         }
         freeRegs.freeRegister(addrRegister);
+//        fae.paramRegister = result;
         return result;
     }
 }
