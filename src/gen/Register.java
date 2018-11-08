@@ -36,7 +36,7 @@ public class Register {
         for (int i=16; i<=23; i++)
             tmpSet.add("$s"+Integer.toString(i-16));
         for (int i=24; i<=25; i++)
-            tmpSet.add("t"+Integer.toString(i-24+8));
+            tmpSet.add("$t"+Integer.toString(i-24+8));
     }
 
     public static final Register gp = new Register(28,"gp");

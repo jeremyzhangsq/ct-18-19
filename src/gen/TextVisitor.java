@@ -23,14 +23,20 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		writer.println(".text");
 		writer.println("j main");
 		for (int i = p.funDecls.size()-1; i>=0;i--) {
-			p.funDecls.get(i).accept(this);
+			if (p.funDecls.get(i).name.equals("main")){
+				p.funDecls.get(i).accept(this);
+				break;
+			}
+		}
+		p.accept(new FuncSeqVistior(this.writer));
+		for (FunDecl fd : freeRegs.functions){
+			fd.accept(this);
 		}
 		return null;
 	}
 
 	@Override
 	public Register visitFunDecl(FunDecl p) {
-		//TODO: arugument
 		switch (p.name) {
 			case "read_c":
 				return null;
@@ -147,6 +153,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		}
 		else
 			idx = conRegister.controlIndex;
+		freeRegs.freeRegister(conRegister);
 		w.stmt.accept(this);
 		emit("j","while"+ai,null,null);
 		writer.println("else"+idx+":");
@@ -162,6 +169,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		}
 		else
 			idx = conRegister.controlIndex;
+		freeRegs.freeRegister(conRegister);
 		i.stmt.accept(this);
 		emit("j","endif"+idx,null,null);
 		writer.println("else"+idx+":");

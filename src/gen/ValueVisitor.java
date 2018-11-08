@@ -200,6 +200,8 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 	}
 	private List<Register> storeRegister() {
 		List<Register> occupied = freeRegs.getOccupyRegs();
+		for (Register o : freeRegs.getOccupyRegs())
+			freeRegs.freeRegister(o);
 		occupied.add(Register.ra);
 		for (int i = occupied.size()-1;i >= 0; i--) {
 			emit("addi",Register.sp.toString(),Register.sp.toString(),"-4");

@@ -2,6 +2,11 @@ struct s{
     int first;
 };
 int foo(int a, int b, int c, int d, int e){
+        print_i(a);
+        print_i(b);
+        print_i(c);
+        print_i(d);
+        print_i(e);
     return a+b+c+d+e;
 }
 

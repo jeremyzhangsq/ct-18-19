@@ -1,14 +1,16 @@
 package gen;
 
 import ast.Expr;
+import ast.FunDecl;
 
 import java.util.*;
 
 public class FreeRegs {
     private static FreeRegs ourInstance = new FreeRegs();
-    private Stack<Register> freeRegs = new Stack<Register>();
+    protected Stack<Register> freeRegs = new Stack<Register>();
     private List<Register> occupyRegs = new ArrayList<>();
     private int controlIdx;
+    protected  List<FunDecl> functions = new ArrayList<>();
     protected Map<String,String> Strs;
     protected Map<Character,String> Chrs;
 
@@ -36,7 +38,15 @@ public class FreeRegs {
         }
     }
     protected void freeRegister(Register reg) {
-        if (Register.tmpSet.contains(reg.toString())){
+        boolean contain = false;
+        List<Register> tmp = new ArrayList<>(freeRegs);
+        for (Register r:tmp){
+            if (r.toString().equals(reg.toString())){
+                contain = true;
+                break;
+            }
+        }
+        if (Register.tmpSet.contains(reg.toString()) && !contain){
             freeRegs.push(reg);
             occupyRegs.remove(reg);
         }
