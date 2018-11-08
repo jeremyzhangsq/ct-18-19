@@ -27,7 +27,9 @@ int main(){
 //      arr[1] = a;
 //      ast.first = 10;
 //      a = read_i();
-      a = foo(a,b,c,d,e.first);
+      print_s((char*) "str");
+      print_i(a);
+//      a = foo(a,b,c,d,e.first);
 //      b = a+b;
       print_i(a);
       return 0;

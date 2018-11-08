@@ -248,12 +248,15 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				}
 			}
 			else {
-				freeRegs.freeRegister(addrRegister);
+
 				freeRegs.freeRegister(result);
 				if (v.vd.paramIdx < 4)
-					return Register.paramRegs[v.vd.paramIdx];
-				else
+					return addrRegister;
+				else{
+					freeRegs.freeRegister(addrRegister);
 					return v.vd.paramRegister;
+				}
+
 			}
 
 		}
