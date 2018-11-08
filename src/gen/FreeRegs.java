@@ -57,6 +57,13 @@ public class FreeRegs {
         return a;
     }
 
+    protected void restoreRegister(List<Register> o){
+        for (Register r : o){
+            if (freeRegs.remove(r)){
+                occupyRegs.add(r);
+            }
+        }
+    }
 
     public int getControlIdx() {
         return this.controlIdx++;

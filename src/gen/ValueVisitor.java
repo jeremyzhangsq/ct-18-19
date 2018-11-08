@@ -165,7 +165,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 					if (cnt<4){
 						argue = expr.accept(this);
 						emit("move", Register.paramRegs[cnt].toString(), argue.toString(),null);
-						freeRegs.freeRegister(argue);
+//						freeRegs.freeRegister(argue);
 					}
 					else {
 //						expr.paramOffset = i-offset;
@@ -197,6 +197,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 			emit("lw",occupy.get(i).toString(),"0("+Register.sp.toString()+")",null);
 			emit("addi",Register.sp.toString(),Register.sp.toString(),"4");
 		}
+		freeRegs.restoreRegister(occupy);
 	}
 	private List<Register> storeRegister() {
 		List<Register> occupied = freeRegs.getOccupyRegs();

@@ -57,14 +57,14 @@ int set(char row, int col, char mark) {
      if (col == 1) {
         if (a11 == empty)
 	    a11 = mark;
-	else
-	  r = -1;
+	    else
+	    r = -1;
      } else {
        if (col == 2) {
          if (a12 == empty)
            a12 = mark;
-	 else
-	   r = -1;
+         else
+           r = -1;
        } else {
          if (col == 3) {
 	   if (a13 == empty)
@@ -173,7 +173,9 @@ void selectmove(int player) {
     row = read_c(); col = read_i();
 
     mark = get_mark(player);
+    print_c(mark);
     success = set(row,col,mark);
+    print_i(success);
       if (success == 0) {
       	 print_s((char*)"That is not a valid move!\n");
       } else {
