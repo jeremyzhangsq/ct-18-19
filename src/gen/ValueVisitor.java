@@ -16,6 +16,10 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 	}
 	@Override
 	public Register visitBinOp(BinOp bop) {
+		bop.lhs.paramOffset = bop.paramOffset;
+		bop.lhs.paramIndex = bop.paramIndex;
+		bop.rhs.paramIndex = bop.paramIndex;
+		bop.rhs.paramOffset = bop.paramOffset;
 		Register lhsRegister = bop.lhs.accept(this);
 		Register rhsRegister = bop.rhs.accept(this);
 		Register result = freeRegs.getRegister();

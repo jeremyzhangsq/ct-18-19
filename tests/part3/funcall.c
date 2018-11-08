@@ -1,18 +1,23 @@
 struct s{
     int first;
 };
-int foo(int a, int d, int c){
-    return a+d+c;
+int foo(int a){
+    return a;
 }
 
 int main(){
-      int arr;
-      struct s ast;
+//      int arr[2];
+//      struct s ast;
+      int a;
       int b;
-      arr = 5;
-      ast.first = 10;
+      int c;
+      c = 10;
+      a = 1;
+//      arr[0] = 5;
+//      arr[1] = a;
+//      ast.first = 10;
 //      a = read_i();
-      b = foo(1,arr,ast.first);
+      b = foo(a+c);
 //      b = a+b;
       print_i(b);
       return 0;
