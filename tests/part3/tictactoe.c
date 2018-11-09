@@ -57,14 +57,14 @@ int set(char row, int col, char mark) {
      if (col == 1) {
         if (a11 == empty)
 	    a11 = mark;
-	    else
-	    r = -1;
+	else
+	  r = -1;
      } else {
        if (col == 2) {
          if (a12 == empty)
            a12 = mark;
-         else
-           r = -1;
+	 else
+	   r = -1;
        } else {
          if (col == 3) {
 	   if (a13 == empty)
@@ -173,9 +173,7 @@ void selectmove(int player) {
     row = read_c(); col = read_i();
 
     mark = get_mark(player);
-    print_c(mark);
     success = set(row,col,mark);
-    print_i(success);
       if (success == 0) {
       	 print_s((char*)"That is not a valid move!\n");
       } else {
@@ -208,7 +206,7 @@ int won(char mark) {
 	  if (a13 == mark) {
 	     r = 1;
 	  }
-	} 
+	}
       }
     }
   }
@@ -231,7 +229,7 @@ int won(char mark) {
         if (a31 == mark) {
 	   r = 1;
 	}
-      } 
+      }
     }
   }
 
@@ -270,14 +268,11 @@ void main() {
     if (won(mark)) {                 // player won
       printWinner(player);
       playing = 0;
-    }
-    else {
-        if (full() == 1) {        // game board is full, it is a draw
-          print_s((char*)"It's a draw!\n");
-          playing = 0;
-        } else {
-          player = switchPlayer(player); // give the turn to the opponent
-        }
+    } else if (full() == 1) {        // game board is full, it is a draw
+      print_s((char*)"It's a draw!\n");
+      playing = 0;
+    } else {
+      player = switchPlayer(player); // give the turn to the opponent
     }
     
     if (playing == 0) {

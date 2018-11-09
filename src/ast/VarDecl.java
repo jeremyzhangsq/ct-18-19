@@ -10,6 +10,7 @@ public class VarDecl implements ASTNode {
     public int paramIdx;
     public StructTypeDecl std;
     public Register paramRegister = null;
+    public String FuncName;
     public VarDecl(Type type, String varName) {
 	    this.type = type;
 	    this.varName = varName;

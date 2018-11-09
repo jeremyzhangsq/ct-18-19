@@ -68,6 +68,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 					vd.paramIdx = cnt;
 					cnt ++;
 				}
+				p.block.FuncName = p.name;
 				p.block.accept(this);
 				emit("jr", Register.ra.toString(), null, null);
 				return null;
@@ -186,6 +187,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			offset = 0;
 			int add = 0;
 			for (VarDecl vd : b.vars){
+				vd.FuncName = b.FuncName;
 				add = vd.offset;
 				vd.offset = offset;
 				offset += add;
