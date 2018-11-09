@@ -133,7 +133,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				Expr e = fce.params.get(0);
 				if (e instanceof IntLiteral)
 					emit("li", param.toString(), Integer.toString(((IntLiteral) fce.params.get(0)).val), null);
-				else if (e instanceof VarExpr) {
+				else{
 					Register r = e.accept(this);
 					emit("move", param.toString(), r.toString(), null);
 					freeRegs.freeRegister(r);
@@ -251,7 +251,6 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				}
 			}
 			else {
-
 				freeRegs.freeRegister(result);
 				if (v.vd.paramRegister == null){
 					for (VarDecl vd: freeRegs.varDecls.get(v.vd.FuncName)){
