@@ -260,8 +260,8 @@ void main() {
 
   empty = ' ';
   playing = 1;
-//  reset();
-//  printGame();
+  reset();
+  printGame();
   player = 1; // Begin with player one
   while (playing) {
     selectmove(player);

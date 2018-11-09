@@ -22,13 +22,13 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 	public Register visitProgram(Program p) {
 		writer.println(".text");
 		writer.println("j main");
+		p.accept(new FuncSeqVistior(this.writer));
 		for (int i = p.funDecls.size()-1; i>=0;i--) {
 			if (p.funDecls.get(i).name.equals("main")){
 				p.funDecls.get(i).accept(this);
 				break;
 			}
 		}
-		p.accept(new FuncSeqVistior(this.writer));
 		for (FunDecl fd : freeRegs.functions){
 			fd.accept(this);
 		}
@@ -52,11 +52,11 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 				return null;
 			case "main":
 				writer.println(p.name + ":");
-				Register register = p.block.accept(this);
+				p.block.accept(this);
 				if (p.type == BaseType.VOID)
 					emit("li", Register.v0.toString(), "10", null);
 				else {
-					emit("move", Register.paramRegs[0].toString(), register.toString(),null);
+					emit("move", Register.paramRegs[0].toString(), Register.v0.toString() ,null);
 					emit("li", Register.v0.toString(), "17", null);
 				}
 				writer.println("syscall");
@@ -68,9 +68,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 					vd.paramIdx = cnt;
 					cnt ++;
 				}
-				Register reg = p.block.accept(this);
-				if (reg != null)
-					emit("addi", Register.v0.toString(), reg.toString(), "0");
+				p.block.accept(this);
 				emit("jr", Register.ra.toString(), null, null);
 				return null;
 		}
@@ -197,10 +195,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		Register register = null;
 		if (!b.stmts.isEmpty()){
 			for (Stmt s: b.stmts){
-				if (s instanceof Return)
-					register = s.accept(this);
-				else
-					s.accept(this);
+				s.accept(this);
 			}
 
 		}
@@ -212,8 +207,9 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		System.out.println("Return");
 		if (r.optionReturn != null){
 			Register register = r.optionReturn.accept(valueVisitor);
+			emit("addi", Register.v0.toString(), register.toString(), "0");
 			freeRegs.freeRegister(register);
-			return register;
+//			return register;
 //			emit("jr",Register.ra.toString(),null,null);
 		}
 		return null;

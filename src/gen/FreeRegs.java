@@ -2,6 +2,7 @@ package gen;
 
 import ast.Expr;
 import ast.FunDecl;
+import ast.VarDecl;
 
 import java.util.*;
 
@@ -11,6 +12,7 @@ public class FreeRegs {
     private List<Register> occupyRegs = new ArrayList<>();
     private int controlIdx;
     protected  List<FunDecl> functions = new ArrayList<>();
+    protected Map<String,List<VarDecl>> varDecls = new HashMap<>();
     protected Map<String,String> Strs;
     protected Map<Character,String> Chrs;
 

@@ -4,6 +4,7 @@ import ast.*;
 import sem.TypeCheckVisitor;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Stack;
@@ -159,6 +160,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				int i = 0;
 				int offset = 4*(fce.params.size()-4);
 				Register argue;
+				freeRegs.varDecls.put(fce.funcName,new ArrayList<VarDecl>());
 				for (Expr expr : fce.params){
 					expr.paramIndex = cnt;
 					expr.paramOffset = occupy.size()*4;
@@ -173,10 +175,10 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 						emit("addi",Register.sp.toString(),Register.sp.toString(),"-4");
 						argue = expr.accept(this);
 						emit("sw",argue.toString(),(i-offset)+"("+Register.sp.toString()+")",null);
-
 						i+=4;
 					}
 					fce.fd.params.get(cnt).paramRegister = argue;
+					freeRegs.varDecls.get(fce.funcName).add(fce.fd.params.get(cnt));
 					cnt++;
 				}
 				emit("jal",fce.funcName,null,null);
@@ -251,15 +253,18 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 			else {
 
 				freeRegs.freeRegister(result);
-				if (v.vd.paramIdx < 4)
+				if (v.vd.paramRegister == null){
+					for (VarDecl vd: freeRegs.varDecls.get(v.vd.FuncName)){
+						if (v.vd.varName.equals(vd.varName))
+							return vd.paramRegister;
+					}
 					return addrRegister;
+				}
 				else{
 					freeRegs.freeRegister(addrRegister);
 					return v.vd.paramRegister;
 				}
-
 			}
-
 		}
 
         if (v.type instanceof ArrayType || v.type instanceof StructType)
