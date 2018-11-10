@@ -135,8 +135,8 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			}
 		}
 
-//		freeRegs.freeRegister(lhsRegister);
-//		freeRegs.freeRegister(rhsRegister);
+		freeRegs.freeRegister(lhsRegister);
+		freeRegs.freeRegister(rhsRegister);
 		return null;
 	}
 

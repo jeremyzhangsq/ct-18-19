@@ -5,9 +5,6 @@ import sem.TypeCheckVisitor;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.EmptyStackException;
-import java.util.List;
-import java.util.Stack;
 
 public class ValueVisitor extends BaseGenVisitor<Register>{
 	private TypeCheckVisitor typeCheckVisitor;
@@ -17,10 +14,8 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 	}
 	@Override
 	public Register visitBinOp(BinOp bop) {
-		bop.lhs.paramOffset = bop.paramOffset;
 		bop.lhs.paramIndex = bop.paramIndex;
 		bop.rhs.paramIndex = bop.paramIndex;
-		bop.rhs.paramOffset = bop.paramOffset;
 		Register lhsRegister = bop.lhs.accept(this);
 		Register rhsRegister = bop.rhs.accept(this);
 		Register result = freeRegs.getRegister();
@@ -167,7 +162,6 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				freeRegs.varDecls.put(fce.funcName,new ArrayList<VarDecl>());
 				for (Expr expr : fce.params){
 					expr.paramIndex = cnt;
-					expr.paramOffset = fce.fd.Occupied.size()*4;
 					if (cnt<4){
 						argue = expr.accept(this);
 						emit("move", Register.paramRegs[cnt].toString(), argue.toString(),null);
@@ -177,7 +171,6 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 					}
 					else {
 //						expr.paramOffset = i-offset;
-						expr.paramOffset += 4;
 						emit("addi",Register.sp.toString(),Register.sp.toString(),"-4");
 						argue = expr.accept(this);
 						emit("sw",argue.toString(),(i-offset)+"("+Register.sp.toString()+")",null);
@@ -232,7 +225,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				if (v.paramIndex == -1)
 					emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
 				else {
-						emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
+					emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
 				}
 			}
 			else {
@@ -262,7 +255,6 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 
 	@Override
 	public Register visitArrayAccessExpr(ArrayAccessExpr aae) {
-		aae.arr.paramOffset = aae.paramOffset;
 		aae.arr.paramIndex = aae.paramIndex;
 		Register idxRegister = aae.idx.accept(this);
 		Register addrRegister = aae.arr.accept(this);
@@ -288,8 +280,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
     @Override
     public Register visitFieldAccessExpr(FieldAccessExpr fae) {
 		fae.structure.paramIndex = fae.paramIndex;
-		fae.structure.paramOffset = fae.paramOffset;
-        Register result = freeRegs.getRegister();
+		Register result = freeRegs.getRegister();
         Register addrRegister= fae.structure.accept(this);
         if (fae.structure instanceof VarExpr){
             int offset = 0;
