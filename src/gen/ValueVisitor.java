@@ -113,13 +113,15 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				return register;
 			}
 			case "print_c": {
-				emit("li", Register.v0.toString(), "11", null);
 				Register param = Register.paramRegs[0];
 				Expr e = fce.params.get(0);
-				if (e instanceof ChrLiteral)
+				if (e instanceof ChrLiteral){
+					emit("li", Register.v0.toString(), "11", null);
 					emit("lb", param.toString(), freeRegs.Chrs.get(((ChrLiteral) e).val), null);
+				}
 				else if (e instanceof VarExpr) {
 					Register r = e.accept(this);
+					emit("li", Register.v0.toString(), "11", null);
 					emit("move", param.toString(), r.toString(), null);
 					freeRegs.freeRegister(r);
 				}
@@ -128,13 +130,15 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				return null;
 			}
 			case "print_i": {
-				emit("li", Register.v0.toString(), "1", null);
 				Register param = Register.paramRegs[0];
 				Expr e = fce.params.get(0);
-				if (e instanceof IntLiteral)
+				if (e instanceof IntLiteral){
+					emit("li", Register.v0.toString(), "1", null);
 					emit("li", param.toString(), Integer.toString(((IntLiteral) fce.params.get(0)).val), null);
+				}
 				else{
 					Register r = e.accept(this);
+					emit("li", Register.v0.toString(), "1", null);
 					emit("move", param.toString(), r.toString(), null);
 					freeRegs.freeRegister(r);
 				}
@@ -155,7 +159,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 			case "mcmalloc":
 				return null;
 			default:
-				List<Register> occupy = storeRegister();
+				fce.fd.Occupied = freeRegs.getOccupyRegs();
 				int cnt = 0;
 				int i = 0;
 				int offset = 4*(fce.params.size()-4);
@@ -163,11 +167,13 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				freeRegs.varDecls.put(fce.funcName,new ArrayList<VarDecl>());
 				for (Expr expr : fce.params){
 					expr.paramIndex = cnt;
-					expr.paramOffset = occupy.size()*4;
+					expr.paramOffset = fce.fd.Occupied.size()*4;
 					if (cnt<4){
 						argue = expr.accept(this);
 						emit("move", Register.paramRegs[cnt].toString(), argue.toString(),null);
-//						freeRegs.freeRegister(argue);
+						freeRegs.freeRegister(argue);
+						if (fce.fd.params.get(cnt).paramRegister == null)
+							fce.fd.params.get(cnt).paramRegister = Register.paramRegs[cnt];
 					}
 					else {
 //						expr.paramOffset = i-offset;
@@ -177,12 +183,11 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 						emit("sw",argue.toString(),(i-offset)+"("+Register.sp.toString()+")",null);
 						i+=4;
 					}
-					fce.fd.params.get(cnt).paramRegister = argue;
 					freeRegs.varDecls.get(fce.funcName).add(fce.fd.params.get(cnt));
 					cnt++;
 				}
 				emit("jal",fce.funcName,null,null);
-				restoreRegister(occupy);
+
 				if (fce.fd.type != BaseType.VOID){
 					Register r = freeRegs.getRegister();
 					emit("move", r.toString(), Register.v0.toString(),null);
@@ -193,26 +198,6 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 		}
 	}
 
-	private void restoreRegister(List<Register> occupy) {
-		emit("move", Register.sp.toString(),Register.fp.toString(),null);
-		for (int i = 0;i < occupy.size(); i++) {
-			emit("lw",occupy.get(i).toString(),"0("+Register.sp.toString()+")",null);
-			emit("addi",Register.sp.toString(),Register.sp.toString(),"4");
-		}
-		freeRegs.restoreRegister(occupy);
-	}
-	private List<Register> storeRegister() {
-		List<Register> occupied = freeRegs.getOccupyRegs();
-		for (Register o : freeRegs.getOccupyRegs())
-			freeRegs.freeRegister(o);
-		occupied.add(Register.ra);
-		for (int i = occupied.size()-1;i >= 0; i--) {
-			emit("addi",Register.sp.toString(),Register.sp.toString(),"-4");
-			emit("sw",occupied.get(i).toString(),"0("+Register.sp.toString()+")",null);
-		}
-		emit("move",Register.fp.toString(), Register.sp.toString(),null);
-		return occupied;
-	}
 	@Override
 	public Register visitChrLiteral(ChrLiteral cl) {
 		Register next = freeRegs.getRegister();
@@ -247,7 +232,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				if (v.paramIndex == -1)
 					emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
 				else {
-						emit("la",addrRegister.toString(),v.paramOffset+v.vd.offset+"("+Register.sp.toString()+")",null);
+						emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
 				}
 			}
 			else {
@@ -261,6 +246,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				}
 				else{
 					freeRegs.freeRegister(addrRegister);
+					freeRegs.setOccupied(v.vd.paramRegister);
 					return v.vd.paramRegister;
 				}
 			}

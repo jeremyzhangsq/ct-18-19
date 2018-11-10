@@ -58,13 +58,20 @@ public class FreeRegs {
         a.addAll(this.occupyRegs);
         return a;
     }
-
+    protected void setOccupied(Register r){
+        if (freeRegs.remove(r)){
+            occupyRegs.add(r);
+        }
+    }
     protected void restoreRegister(List<Register> o){
         for (Register r : o){
-            if (freeRegs.remove(r)){
-                occupyRegs.add(r);
-            }
+            setOccupied(r);
         }
+    }
+    protected void freeAll(){
+        freeRegs.clear();
+        occupyRegs.clear();
+        freeRegs.addAll(Register.tmpRegs);
     }
 
     public int getControlIdx() {

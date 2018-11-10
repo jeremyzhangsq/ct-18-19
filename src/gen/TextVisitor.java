@@ -4,6 +4,7 @@ import ast.*;
 import sem.TypeCheckVisitor;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TextVisitor extends BaseGenVisitor<Register> {
@@ -35,6 +36,41 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		return null;
 	}
 
+    private void reloadRegister(List<Register> occupied) {
+//        emit("move", Register.sp.toString(),Register.fp.toString(),null);
+        for (int i = occupied.size()-1;i >= 0; i--) {
+            emit("lw",occupied.get(i).toString(),"0("+Register.sp.toString()+")",null);
+            emit("addi",Register.sp.toString(),Register.sp.toString(),"4");
+        }
+        freeRegs.restoreRegister(occupied);
+    }
+    private List<Register> storeRegister(FunDecl fd) {
+//        for (Register o : fd.Occupied)
+//            freeRegs.freeRegister(o);
+        fd.Occupied.add(Register.ra);
+        for (int i = 0;i < fd.Occupied.size(); i++) {
+            emit("addi",Register.sp.toString(),Register.sp.toString(),"-4");
+            emit("sw",fd.Occupied.get(i).toString(),"0("+Register.sp.toString()+")",null);
+        }
+        int offset = fd.params.size()*4;
+        emit("addi",Register.sp.toString(),Register.sp.toString(),"-"+offset);
+        for (int i = 0; i<fd.params.size();i++) {
+            Register r = freeRegs.getRegister();
+            fd.Occupied.add(r);
+            emit("sw",r.toString(),4*i+"("+Register.sp.toString()+")",null);
+            if (i<4){
+                emit("move",r.toString(),Register.paramRegs[i].toString(),null);
+            }
+            else {
+                //TODO
+            }
+            fd.params.get(i).paramRegister = r;
+        }
+//        emit("move",Register.fp.toString(), Register.sp.toString(),null);
+        return fd.Occupied;
+    }
+
+
 	@Override
 	public Register visitFunDecl(FunDecl p) {
 		switch (p.name) {
@@ -64,13 +100,16 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			default:
 				writer.println(p.name + ":");
 				int cnt = 0;
-				for (VarDecl vd : p.params){
-					vd.paramIdx = cnt;
-					cnt ++;
-				}
+				List<Register> occupied = storeRegister(p);
+                for (VarDecl vd : p.params){
+                    vd.paramIdx = cnt;
+                    cnt ++;
+                }
 				p.block.FuncName = p.name;
 				p.block.accept(this);
+				reloadRegister(occupied);
 				emit("jr", Register.ra.toString(), null, null);
+				freeRegs.freeAll();
 				return null;
 		}
 	}
@@ -96,8 +135,8 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			}
 		}
 
-		freeRegs.freeRegister(lhsRegister);
-		freeRegs.freeRegister(rhsRegister);
+//		freeRegs.freeRegister(lhsRegister);
+//		freeRegs.freeRegister(rhsRegister);
 		return null;
 	}
 

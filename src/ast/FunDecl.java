@@ -1,5 +1,7 @@
 package ast;
 
+import gen.Register;
+
 import java.util.List;
 
 public class FunDecl implements ASTNode {
@@ -7,6 +9,7 @@ public class FunDecl implements ASTNode {
     public final String name;
     public final List<VarDecl> params;
     public final Block block;
+    public List<Register> Occupied;
 
     public FunDecl(Type type, String name, List<VarDecl> params, Block block) {
 	    this.type = type;
