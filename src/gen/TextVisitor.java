@@ -92,14 +92,8 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 				return null;
 			case "main":
 				writer.println(p.name + ":");
+                p.block.FuncName = p;
 				p.block.accept(this);
-				if (p.type == BaseType.VOID)
-					emit("li", Register.v0.toString(), "10", null);
-				else {
-					emit("move", Register.paramRegs[0].toString(), Register.v0.toString() ,null);
-					emit("li", Register.v0.toString(), "17", null);
-				}
-				writer.println("syscall");
 				return null;
 			default:
 				writer.println(p.name + ":");
@@ -110,7 +104,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
                     vd.paramIdx = cnt;
                     cnt ++;
                 }
-				p.block.FuncName = p.name;
+				p.block.FuncName = p;
 				p.block.accept(this);
 				reloadRegister(occupied);
 				emit("jr", Register.ra.toString(), null, null);
@@ -197,6 +191,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		else
 			idx = conRegister.controlIndex;
 		freeRegs.freeRegister(conRegister);
+		w.stmt.FuncName = w.FuncName;
 		w.stmt.accept(this);
 		emit("j","while"+ai,null,null);
 		writer.println("else"+idx+":");
@@ -213,10 +208,12 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		else
 			idx = conRegister.controlIndex;
 		freeRegs.freeRegister(conRegister);
+		i.stmt.FuncName = i.FuncName;
 		i.stmt.accept(this);
 		emit("j","endif"+idx,null,null);
 		writer.println("else"+idx+":");
 		if (i.elseStmt!=null){
+		    i.elseStmt.FuncName = i.FuncName;
 			i.elseStmt.accept(this);
 		}
 		writer.println("endif"+idx+":");
@@ -239,7 +236,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			int add = 0;
 			// to backtrace the address of the varaiable, push offset into stack for shadowing
 			for (VarDecl vd : b.vars){
-				vd.FuncName = b.FuncName;
+				vd.FuncName = b.FuncName.name;
 				add = vd.offset.peek();
 				vd.offset.push(offset);
 				freeRegs.vars.add(vd); // for shadowing recore existing vars
@@ -250,6 +247,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		Register register = null;
 		if (!b.stmts.isEmpty()){
 			for (Stmt s: b.stmts){
+			    s.FuncName = b.FuncName;
 				s.accept(this);
 			}
 		}
@@ -274,7 +272,6 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 
 	@Override
 	public Register visitReturn(Return r) {
-		System.out.println("Return");
 		if (r.optionReturn != null){
 			Register register = r.optionReturn.accept(valueVisitor);
 			emit("addi", Register.v0.toString(), register.toString(), "0");
@@ -285,6 +282,15 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		else {
             reloadRegister(freeRegs.earlyReturn);
             emit("jr", Register.ra.toString(), null, null);
+        }
+        if (r.FuncName.name.equals("main")){
+            if (r.FuncName.type == BaseType.VOID)
+                emit("li", Register.v0.toString(), "10", null);
+            else {
+                emit("move", Register.paramRegs[0].toString(), Register.v0.toString() ,null);
+                emit("li", Register.v0.toString(), "17", null);
+            }
+            writer.println("syscall");
         }
 		return null;
 	}

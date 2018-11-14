@@ -110,6 +110,7 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 	public T visitWhile(While w) {
 		System.out.println("While");
 		w.expr.accept(this);
+		w.stmt.FuncName = w.FuncName;
 		w.stmt.accept(this);
 		return null;
 	}
@@ -132,9 +133,13 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 	public T visitIf(If i) {
 		System.out.println("If");
 		i.condition.accept(this);
+		i.stmt.FuncName = i.FuncName;
 		i.stmt.accept(this);
-		if (i.elseStmt!=null)
+		if (i.elseStmt!=null){
+			i.elseStmt.FuncName = i.FuncName;
 			i.elseStmt.accept(this);
+		}
+
 		return null;
 	}
 
@@ -170,8 +175,10 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 				vd.accept(this);
 		}
 		if (b.stmts != null){
-			for (Stmt s: b.stmts)
+			for (Stmt s: b.stmts) {
+				s.FuncName = b.FuncName;
 				s.accept(this);
+			}
 		}
 		return null;
 	}
@@ -187,6 +194,7 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 				vd.accept(this);
 			}
 		}
+		p.block.FuncName = p;
 		p.block.accept(this);
 		return null;
 	}
