@@ -92,6 +92,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 	}
 	@Override
 	public Register visitFunCallExpr(FunCallExpr fce) {
+		Register ar;
 		switch (fce.funcName) {
 			case "read_c": {
 				emit("li", Register.v0.toString(), "12", null);
@@ -108,7 +109,10 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				return register;
 			}
 			case "print_c": {
+				// store a0 to tmp
+				ar = freeRegs.getRegister();
 				Register param = Register.paramRegs[0];
+				emit("move",ar.toString(),param.toString(),null);
 				Expr e = fce.params.get(0);
 				if (e instanceof ChrLiteral){
 					emit("li", Register.v0.toString(), "11", null);
@@ -122,10 +126,16 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				}
 
 				writer.println("syscall");
+				// return a0 value from tmp back to a0
+				emit("move",param.toString(),ar.toString(),null);
+				freeRegs.freeRegister(ar);
 				return null;
 			}
 			case "print_i": {
+				// store a0 to tmp
+				ar = freeRegs.getRegister();
 				Register param = Register.paramRegs[0];
+				emit("move",ar.toString(),param.toString(),null);
 				Expr e = fce.params.get(0);
 				if (e instanceof IntLiteral){
 					emit("li", Register.v0.toString(), "1", null);
@@ -138,17 +148,26 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 					freeRegs.freeRegister(r);
 				}
 				writer.println("syscall");
+				// return a0 value from tmp back to a0
+				emit("move",param.toString(),ar.toString(),null);
+				freeRegs.freeRegister(ar);
 				return null;
 			}
 			case "print_s": {
-				emit("li", Register.v0.toString(), "4", null);
+				// store a0 to tmp
+				ar = freeRegs.getRegister();
 				Register param = Register.paramRegs[0];
+				emit("move",ar.toString(),param.toString(),null);
+				emit("li", Register.v0.toString(), "4", null);
 				Type t = fce.params.get(0).accept(typeCheckVisitor);
 				if (t instanceof PointerType && ((PointerType) t).register != null)
 					emit("la", param.toString(), "0(" + ((PointerType) t).register.toString() + ")", null);
 				else
 					emit("la", param.toString(), freeRegs.Strs.get(((StrLiteral) (((TypecastExpr) (fce.params.get(0))).expr)).val), null);
 				writer.println("syscall");
+				// return a0 value from tmp back to a0
+				emit("move",param.toString(),ar.toString(),null);
+				freeRegs.freeRegister(ar);
 				return null;
 			}
 			case "mcmalloc":
