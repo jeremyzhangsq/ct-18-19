@@ -56,14 +56,18 @@ public class TextVisitor extends BaseGenVisitor<Register> {
             Register r = freeRegs.getRegister();
             fd.Occupied.add(r);
 			emit("addi",Register.sp.toString(),Register.sp.toString(),"-4");
-            emit("sw",r.toString(),"0("+Register.sp.toString()+")",null);
             if (i<4){
                 emit("move",r.toString(),Register.paramRegs[i].toString(),null);
-                r.forParam = true;
+
             }
             else {
                 //TODO
+				Register tmp = fd.params.get(i).paramRegister;
+				emit("move",r.toString(),tmp.toString(),null);
+				freeRegs.freeRegister(tmp);
             }
+			emit("sw",r.toString(),"0("+Register.sp.toString()+")",null);
+            r.forParam = true;
             fd.params.get(i).paramRegister = r;
         }
 //        emit("move",Register.fp.toString(), Register.sp.toString(),null);
