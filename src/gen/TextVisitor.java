@@ -125,10 +125,14 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		Register lhsRegister = a.lhs.accept(addrVisitor);
 		Register rhsRegister = a.rhs.accept(valueVisitor);
 		Type lhs = a.lhs.accept(typeCheckVisitor);
+		//TODO:check
 		if (lhs instanceof PointerType)
 			((PointerType) lhs).register = rhsRegister;
 		if (rhsRegister != null){
 			Type rhs = a.rhs.accept(typeCheckVisitor);
+			// special case for char* a = (char*)"string";
+			if (rhs instanceof PointerType && ((PointerType) rhs).type==BaseType.CHAR)
+				rhsRegister.forParam = true;
 			if (rhs == BaseType.CHAR)
 				emit("sb",rhsRegister.toString(),"0("+lhsRegister.toString()+")",null);
 			else {
