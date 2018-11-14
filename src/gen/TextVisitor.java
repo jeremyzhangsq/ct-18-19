@@ -59,6 +59,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
             emit("sw",r.toString(),"0("+Register.sp.toString()+")",null);
             if (i<4){
                 emit("move",r.toString(),Register.paramRegs[i].toString(),null);
+                r.forParam = true;
             }
             else {
                 //TODO

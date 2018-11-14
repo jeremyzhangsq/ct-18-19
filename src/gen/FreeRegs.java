@@ -49,7 +49,7 @@ public class FreeRegs {
                 break;
             }
         }
-        if (Register.tmpSet.contains(reg.toString()) && !contain){
+        if (Register.tmpSet.contains(reg.toString()) && !contain && !reg.forParam){
             freeRegs.push(reg);
             occupyRegs.remove(reg);
         }
@@ -72,6 +72,8 @@ public class FreeRegs {
     protected void freeAll(){
         freeRegs.clear();
         occupyRegs.clear();
+        for (Register r:Register.tmpRegs)
+            r.forParam = false;
         freeRegs.addAll(Register.tmpRegs);
     }
 
