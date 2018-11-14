@@ -12,8 +12,10 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 	private AddrVisitor addrVisitor;
 	private ValueVisitor valueVisitor;
 	private TypeCheckVisitor typeCheckVisitor;
+	private ExprNameVisitor exprNameVisitor;
 	public TextVisitor(PrintWriter writer, Program program) {
 		super(writer);
+		exprNameVisitor = new ExprNameVisitor(writer);
 		addrVisitor = new AddrVisitor(writer,program);
 		valueVisitor = new ValueVisitor(writer,program);
 		typeCheckVisitor = new TypeCheckVisitor();
@@ -125,6 +127,8 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		Type lhs = a.lhs.accept(typeCheckVisitor);
 		if (lhs instanceof PointerType)
 			((PointerType) lhs).register = rhsRegister;
+//		if (lhs instanceof ArrayType)
+//		    ((ArrayType) lhs).register = rhsRegister;
 		if (rhsRegister != null){
 			Type rhs = a.rhs.accept(typeCheckVisitor);
 			if (rhs == BaseType.CHAR)
@@ -135,7 +139,13 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		}
 
 		freeRegs.freeRegister(lhsRegister);
-		freeRegs.freeRegister(rhsRegister);
+		if (rhsRegister.segment == Register.sp)
+		    freeRegs.freeRegister(rhsRegister);
+		else{
+		    String name = a.lhs.accept(exprNameVisitor);
+            freeRegs.DynamicAddr.put(name,rhsRegister);
+        }
+
 		return null;
 	}
 

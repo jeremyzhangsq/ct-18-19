@@ -49,6 +49,7 @@ public class Register {
     private final String name;  // register name
     protected String controlIndex;
     protected boolean forParam;
+    protected Register segment;
     private Register(int num, String name) {
         this.num = num;
         this.name = name;

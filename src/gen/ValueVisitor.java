@@ -171,8 +171,18 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				return null;
 			}
 			case "mcmalloc":
-				//TODO
-				return null;
+				ar = freeRegs.getRegister();
+				Register param = Register.paramRegs[0];
+				emit("move",ar.toString(),param.toString(),null);
+				Register size = fce.params.get(0).accept(this);
+				emit("li", Register.v0.toString(), "9", null);
+				emit("move",param.toString(),size.toString(),null); // move required byte size to a0
+				writer.println("syscall");
+				emit("move",size.toString(),Register.v0.toString(),null); // use 'size' to store returned addr
+				emit("move",param.toString(),ar.toString(),null);
+				freeRegs.freeRegister(ar);
+				size.segment = null;
+				return size;
 			default:
 				fce.fd.Occupied = freeRegs.getOccupyRegs();
 				int cnt = 0;
