@@ -147,34 +147,34 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			if (vd.type instanceof ArrayType && ((ArrayType) vd.type).type == BaseType.INT){
 				size = 4*((ArrayType) vd.type).arrSize;
 				offset += size;
-				vd.offset = size;
+				vd.offset.push(size);
 			}
 			else if (vd.type instanceof ArrayType && ((ArrayType) vd.type).type == BaseType.CHAR){
 				int s = ((ArrayType) vd.type).arrSize;
 				if (s % 4 == 0){
 					offset += s;
-					vd.offset = s;
+					vd.offset.push(s);
 				}
 				else{
 					size = 4*(s/4 + 1);
 					offset += size;
-					vd.offset = size;
+					vd.offset.push(size);
 				}
 			}
 			else if (vd.type instanceof ArrayType && ((ArrayType) vd.type).type instanceof StructType){
 				size = getOffset(vd.std.vars);
 				size *= ((ArrayType) vd.type).arrSize;
 				offset += size;
-				vd.offset = size;
+				vd.offset.push(size);
 			}
 			else if (vd.type instanceof StructType){
 				size = getOffset(vd.std.vars);
 				offset += size;
-				vd.offset = size;
+				vd.offset.push(size);
 			}
 			else{
 				offset += 4;
-				vd.offset = 4;
+				vd.offset.push(4);
 			}
 		}
 		return offset;
@@ -222,13 +222,22 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 	public Register visitBlock(Block b) {
 		if (!b.vars.isEmpty()){
 			int offset = getOffset(b.vars);
+//
+			for (VarDecl vd: freeRegs.vars){
+				int a = vd.offset.pop();
+				a += offset;
+				vd.offset.push(a);
+			}
+
 			emit("addi",Register.sp.toString(),Register.sp.toString(),Integer.toString(-offset));
 			offset = 0;
 			int add = 0;
+			// to backtrace the address of the varaiable, push offset into stack for shadowing
 			for (VarDecl vd : b.vars){
 				vd.FuncName = b.FuncName;
-				add = vd.offset;
-				vd.offset = offset;
+				add = vd.offset.peek();
+				vd.offset.push(offset);
+				freeRegs.vars.add(vd); // for shadowing recore existing vars
 				offset += add;
 				vd.isGlobal = false;
 			}
@@ -238,7 +247,22 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			for (Stmt s: b.stmts){
 				s.accept(this);
 			}
-
+		}
+		// for shadowing: pop out the offset for the local shadowing
+		if (!b.vars.isEmpty()){
+			int cnt = 0;
+			for (VarDecl vd : b.vars){
+				vd.offset.pop();
+				cnt += vd.offset.pop();
+				freeRegs.vars.remove(vd); //for shadowing update vars, remove local variable
+			}
+			emit("addi",Register.sp.toString(),Register.sp.toString(),Integer.toString(cnt)); // row back the sp cuz the local variable is used up
+			// row back the offset for remaining variable
+			for (VarDecl vd : freeRegs.vars){
+				int a = vd.offset.pop();
+				a -= cnt;
+				vd.offset.push(a);
+			}
 		}
 		return register;
 	}

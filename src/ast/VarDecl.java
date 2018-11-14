@@ -2,10 +2,12 @@ package ast;
 
 import gen.Register;
 
+import java.util.Stack;
+
 public class VarDecl implements ASTNode {
     public final Type type;
     public final String varName;
-    public int offset;
+    public Stack<Integer> offset;
     public boolean isGlobal;
     public int paramIdx;
     public StructTypeDecl std;
@@ -15,6 +17,7 @@ public class VarDecl implements ASTNode {
 	    this.type = type;
 	    this.varName = varName;
 	    this.paramIdx = -1;
+	    offset = new Stack<>();
     }
 
      public <T> T accept(ASTVisitor<T> v) {

@@ -223,9 +223,9 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 		else{
 			if (v.vd.paramIdx == -1){
 				if (v.paramIndex == -1)
-					emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
+					emit("la",addrRegister.toString(),v.vd.offset.peek()+"("+Register.sp.toString()+")",null);
 				else {
-					emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
+					emit("la",addrRegister.toString(),v.vd.offset.peek()+"("+Register.sp.toString()+")",null);
 				}
 			}
 			else {
@@ -288,7 +288,7 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
             Type t = null;
             for (VarDecl vd: ((VarExpr) fae.structure).std.vars){
                 if (!vd.varName.equals(fae.fieldName))
-                    offset += vd.offset;
+                    offset += vd.offset.peek();
                 else {
                     t = vd.type;
                     break;

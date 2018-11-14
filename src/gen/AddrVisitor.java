@@ -21,7 +21,7 @@ public class AddrVisitor extends BaseGenVisitor<Register>{
 		if (v.vd.isGlobal)
 			emit("la",addrRegister.toString(),v.name,null);
 		else
-			emit("la",addrRegister.toString(),v.vd.offset+"("+Register.sp.toString()+")",null);
+			emit("la",addrRegister.toString(),v.vd.offset.peek()+"("+Register.sp.toString()+")",null);
 		return addrRegister;
 	}
 
@@ -53,7 +53,7 @@ public class AddrVisitor extends BaseGenVisitor<Register>{
 //			}
 			for (VarDecl vd: ((VarExpr) fae.structure).std.vars){
 				if (!vd.varName.equals(fae.fieldName))
-					offset += vd.offset;
+					offset += vd.offset.peek();
 				else break;
 			}
 //			offset = size - offset;

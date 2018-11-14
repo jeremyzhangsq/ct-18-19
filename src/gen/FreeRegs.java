@@ -12,6 +12,7 @@ public class FreeRegs {
     private List<Register> occupyRegs = new ArrayList<>();
     private int controlIdx;
     protected  List<FunDecl> functions = new ArrayList<>();
+    protected List<VarDecl> vars = new ArrayList<>(); // global variable list: for shadowing update offset for existing vars
     protected Map<String,List<VarDecl>> varDecls = new HashMap<>();
     protected Map<String,String> Strs;
     protected Map<Character,String> Chrs;
