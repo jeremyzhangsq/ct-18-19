@@ -1,5 +1,9 @@
-
+struct name{
+    int a;
+};
 int main(){
+    struct name st;
+    st.a = 10;
     int x;
     x = 20;
     char a;
@@ -10,6 +14,8 @@ int main(){
     i = 0;
     if (i<10){
         char a;
+        struct name st;
+        st.a = 20;
         a = 'i';
         while(i < 5) {
               int x;
@@ -18,7 +24,11 @@ int main(){
               i = i+1;
         }
         print_c(a);
+        print_s((char*)"\n");
+        print_i(st.a);
     }
+    print_s((char*)"\n");
+    print_i(st.a);
     print_s((char*)"\n");
     print_c(a);
     print_s((char*)"\n");
