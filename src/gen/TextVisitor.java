@@ -290,6 +290,16 @@ public class TextVisitor extends BaseGenVisitor<Register> {
             reloadRegister(freeRegs.earlyReturn);
             emit("jr", Register.ra.toString(), null, null);
         }
+        // early return for main
+        if (r.FuncName.name.equals("main")){
+			if (r.FuncName.type == BaseType.VOID)
+				emit("li", Register.v0.toString(), "10", null);
+			else {
+				emit("move", Register.paramRegs[0].toString(), Register.v0.toString() ,null);
+				emit("li", Register.v0.toString(), "17", null);
+			}
+			writer.println("syscall");
+		}
 		return null;
 	}
 }
