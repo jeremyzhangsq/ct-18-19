@@ -18,16 +18,10 @@ public class AddrVisitor extends BaseGenVisitor<Register>{
 	@Override
 	public Register visitVarExpr(VarExpr v) {
 		Register addrRegister = freeRegs.getRegister();
-		if (v.vd.isGlobal){
+		if (v.vd.isGlobal)
 			emit("la",addrRegister.toString(),v.name,null);
-		}
-		else{
-			if (freeRegs.DynamicAddr.keySet().contains(v.name))
-				emit("la",addrRegister.toString(),v.vd.offset.peek()+"("+freeRegs.DynamicAddr.get(v.name).toString()+")",null);
-			else
-				emit("la",addrRegister.toString(),v.vd.offset.peek()+"("+Register.sp.toString()+")",null);
-		}
-
+		else
+			emit("la",addrRegister.toString(),v.vd.offset.peek()+"("+Register.sp.toString()+")",null);
 		return addrRegister;
 	}
 

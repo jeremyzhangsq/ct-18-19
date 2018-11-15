@@ -104,6 +104,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 				writer.println(p.name + ":");
 				int cnt = 0;
 				List<Register> occupied = storeRegister(p);
+				freeRegs.earlyReturn = occupied;
                 for (VarDecl vd : p.params){
                     vd.paramIdx = cnt;
                     cnt ++;
@@ -285,6 +286,10 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 //			return register;
 //			emit("jr",Register.ra.toString(),null,null);
 		}
+		else {
+            reloadRegister(freeRegs.earlyReturn);
+            emit("jr", Register.ra.toString(), null, null);
+        }
 		return null;
 	}
 }
