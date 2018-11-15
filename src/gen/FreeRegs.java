@@ -16,7 +16,6 @@ public class FreeRegs {
     protected Map<String,List<VarDecl>> varDecls = new HashMap<>();
     protected Map<String,String> Strs;
     protected Map<Character,String> Chrs;
-    protected int Offset;
     protected List<Register> earlyReturn; //store occupied registers for return;
     public static FreeRegs getInstance() {
         return ourInstance;
@@ -27,9 +26,7 @@ public class FreeRegs {
         List<Register> tmp = new ArrayList<>();
         Strs = new HashMap<>();
         Chrs = new HashMap<>();
-        earlyReturn = null;
         controlIdx = 0;
-        Offset = 0;
     }
     private class RegisterAllocationError extends Error {}
 
