@@ -56,6 +56,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
             Register r = freeRegs.getRegister();
             fd.Occupied.add(r);
 			emit("addi",Register.sp.toString(),Register.sp.toString(),"-4");
+            emit("sw",r.toString(),"0("+Register.sp.toString()+")",null);
             if (i<4){
                 emit("move",r.toString(),Register.paramRegs[i].toString(),null);
                 r.forParam = true;
@@ -66,7 +67,6 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 				freeRegs.freeRegister(tmp);
 				r.forParam = true;
             }
-			emit("sw",r.toString(),"0("+Register.sp.toString()+")",null);
             fd.params.get(i).paramRegister = r;
         }
 //        emit("move",Register.fp.toString(), Register.sp.toString(),null);
@@ -104,7 +104,6 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 				writer.println(p.name + ":");
 				int cnt = 0;
 				List<Register> occupied = storeRegister(p);
-				freeRegs.earlyReturn = occupied;
                 for (VarDecl vd : p.params){
                     vd.paramIdx = cnt;
                     cnt ++;
@@ -128,7 +127,6 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		Register lhsRegister = a.lhs.accept(addrVisitor);
 		Register rhsRegister = a.rhs.accept(valueVisitor);
 		Type lhs = a.lhs.accept(typeCheckVisitor);
-		//TODO:check
 		if (lhs instanceof PointerType)
 			((PointerType) lhs).register = rhsRegister;
 		if (rhsRegister != null){
@@ -286,20 +284,6 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			freeRegs.freeRegister(register);
 //			return register;
 //			emit("jr",Register.ra.toString(),null,null);
-		}
-		else {
-            reloadRegister(freeRegs.earlyReturn);
-            emit("jr", Register.ra.toString(), null, null);
-        }
-        // early return for main
-        if (r.FuncName.name.equals("main")){
-			if (r.FuncName.type == BaseType.VOID)
-				emit("li", Register.v0.toString(), "10", null);
-			else {
-				emit("move", Register.paramRegs[0].toString(), Register.v0.toString() ,null);
-				emit("li", Register.v0.toString(), "17", null);
-			}
-			writer.println("syscall");
 		}
 		return null;
 	}
