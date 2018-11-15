@@ -205,11 +205,9 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 							fce.fd.params.get(cnt).paramRegister = Register.paramRegs[cnt];
 					}
 					else {
-//						expr.paramOffset = i-offset;
-						emit("addi",Register.sp.toString(),Register.sp.toString(),"-4");
 						argue = expr.accept(this);
-						emit("sw",argue.toString(),(i-offset)+"("+Register.sp.toString()+")",null);
-						i+=4;
+						if (fce.fd.params.get(cnt).paramRegister == null)
+							fce.fd.params.get(cnt).paramRegister = argue;
 					}
 					freeRegs.varDecls.get(fce.funcName).add(fce.fd.params.get(cnt));
 					cnt++;
@@ -288,12 +286,26 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 		return result;
 	}
 
-	@Override
+    @Override
+    public Register visitValueAtExpr(ValueAtExpr vae) {
+        Register addrRegister = vae.val.accept(this);
+        Register result = freeRegs.getRegister();
+        String cmd = "lw";
+        emit(cmd,result.toString(),"0("+addrRegister.toString()+")",null);
+        if (vae.type == BaseType.CHAR)
+            cmd = "lb";
+        emit(cmd,addrRegister.toString(),"0("+result.toString()+")",null);
+        freeRegs.freeRegister(result);
+        return addrRegister;
+    }
+
+    @Override
 	public Register visitArrayAccessExpr(ArrayAccessExpr aae) {
 		aae.arr.paramIndex = aae.paramIndex;
 		Register idxRegister = aae.idx.accept(this);
 		Register addrRegister = aae.arr.accept(this);
 		Register result = freeRegs.getRegister();
+		Register addr = freeRegs.getRegister();
 		Register offset = freeRegs.getRegister();
         if (aae.arr.type == BaseType.CHAR)
             emit("li",offset.toString(),"1",null);
@@ -301,13 +313,14 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
             emit("li",offset.toString(),"4",null);
 		emit("mult",offset.toString(),idxRegister.toString(),null);
 		emit("mflo",offset.toString(),null,null);
-		emit("add",addrRegister.toString(),addrRegister.toString(),offset.toString());
+		emit("add",addr.toString(),addrRegister.toString(),offset.toString());
 		if (aae.arr.type == BaseType.CHAR)
-			emit("lb",result.toString(),"0("+addrRegister+")",null);
+			emit("lb",result.toString(),"0("+addr+")",null);
 		else
-			emit("lw",result.toString(),"0("+addrRegister+")",null);
+			emit("lw",result.toString(),"0("+addr+")",null);
 		freeRegs.freeRegister(idxRegister);
 		freeRegs.freeRegister(addrRegister);
+		freeRegs.freeRegister(addr);
 		freeRegs.freeRegister(offset);
 //		aae.paramRegister = result;
 		return result;

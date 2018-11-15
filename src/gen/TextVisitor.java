@@ -56,14 +56,17 @@ public class TextVisitor extends BaseGenVisitor<Register> {
             Register r = freeRegs.getRegister();
             fd.Occupied.add(r);
 			emit("addi",Register.sp.toString(),Register.sp.toString(),"-4");
-            emit("sw",r.toString(),"0("+Register.sp.toString()+")",null);
             if (i<4){
                 emit("move",r.toString(),Register.paramRegs[i].toString(),null);
                 r.forParam = true;
             }
             else {
-                //TODO
+				Register tmp = fd.params.get(i).paramRegister;
+				emit("move",r.toString(),tmp.toString(),null);
+				freeRegs.freeRegister(tmp);
+				r.forParam = true;
             }
+			emit("sw",r.toString(),"0("+Register.sp.toString()+")",null);
             fd.params.get(i).paramRegister = r;
         }
 //        emit("move",Register.fp.toString(), Register.sp.toString(),null);
@@ -106,7 +109,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
                     vd.paramIdx = cnt;
                     cnt ++;
                 }
-				p.block.FuncName = p.name;
+				p.block.FuncName = p;
 				p.block.accept(this);
 				reloadRegister(occupied);
 				emit("jr", Register.ra.toString(), null, null);
@@ -197,6 +200,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		else
 			idx = conRegister.controlIndex;
 		freeRegs.freeRegister(conRegister);
+		w.stmt.FuncName = w.FuncName;
 		w.stmt.accept(this);
 		emit("j","while"+ai,null,null);
 		writer.println("else"+idx+":");
@@ -213,10 +217,12 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		else
 			idx = conRegister.controlIndex;
 		freeRegs.freeRegister(conRegister);
+		i.stmt.FuncName = i.FuncName;
 		i.stmt.accept(this);
 		emit("j","endif"+idx,null,null);
 		writer.println("else"+idx+":");
 		if (i.elseStmt!=null){
+			i.elseStmt.FuncName = i.FuncName;
 			i.elseStmt.accept(this);
 		}
 		writer.println("endif"+idx+":");
@@ -239,7 +245,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			int add = 0;
 			// to backtrace the address of the varaiable, push offset into stack for shadowing
 			for (VarDecl vd : b.vars){
-				vd.FuncName = b.FuncName;
+				vd.FuncName = b.FuncName.name;
 				add = vd.offset.peek();
 				vd.offset.push(offset);
 				freeRegs.vars.add(vd); // for shadowing recore existing vars
@@ -274,7 +280,6 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 
 	@Override
 	public Register visitReturn(Return r) {
-		System.out.println("Return");
 		if (r.optionReturn != null){
 			Register register = r.optionReturn.accept(valueVisitor);
 			emit("addi", Register.v0.toString(), register.toString(), "0");
@@ -286,6 +291,16 @@ public class TextVisitor extends BaseGenVisitor<Register> {
             reloadRegister(freeRegs.earlyReturn);
             emit("jr", Register.ra.toString(), null, null);
         }
+        // early return for main
+        if (r.FuncName.name.equals("main")){
+			if (r.FuncName.type == BaseType.VOID)
+				emit("li", Register.v0.toString(), "10", null);
+			else {
+				emit("move", Register.paramRegs[0].toString(), Register.v0.toString() ,null);
+				emit("li", Register.v0.toString(), "17", null);
+			}
+			writer.println("syscall");
+		}
 		return null;
 	}
 }
