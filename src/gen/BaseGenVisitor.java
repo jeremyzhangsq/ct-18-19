@@ -139,7 +139,6 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 			i.elseStmt.FuncName = i.FuncName;
 			i.elseStmt.accept(this);
 		}
-
 		return null;
 	}
 
@@ -175,10 +174,11 @@ public class BaseGenVisitor<T> implements GenVisitor<T> {
 				vd.accept(this);
 		}
 		if (b.stmts != null){
-			for (Stmt s: b.stmts) {
+			for (Stmt s: b.stmts){
 				s.FuncName = b.FuncName;
 				s.accept(this);
 			}
+
 		}
 		return null;
 	}

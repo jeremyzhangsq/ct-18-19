@@ -16,7 +16,7 @@ public class FreeRegs {
     protected Map<String,List<VarDecl>> varDecls = new HashMap<>();
     protected Map<String,String> Strs;
     protected Map<Character,String> Chrs;
-    protected Map<String,Register> DynamicAddr = new HashMap<>();
+    protected int Offset;
     protected List<Register> earlyReturn; //store occupied registers for return;
     public static FreeRegs getInstance() {
         return ourInstance;
@@ -24,14 +24,12 @@ public class FreeRegs {
 
     private FreeRegs() {
         freeRegs.addAll(Register.tmpRegs);
-        for (Register r:freeRegs){
-            r.segment =  Register.sp;
-        }
         List<Register> tmp = new ArrayList<>();
         Strs = new HashMap<>();
         Chrs = new HashMap<>();
         earlyReturn = null;
         controlIdx = 0;
+        Offset = 0;
     }
     private class RegisterAllocationError extends Error {}
 
@@ -77,12 +75,8 @@ public class FreeRegs {
     protected void freeAll(){
         freeRegs.clear();
         occupyRegs.clear();
-        DynamicAddr.clear();
-        for (Register r:Register.tmpRegs){
+        for (Register r:Register.tmpRegs)
             r.forParam = false;
-            r.segment = Register.sp;
-        }
-
         freeRegs.addAll(Register.tmpRegs);
     }
 

@@ -12,10 +12,8 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 	private AddrVisitor addrVisitor;
 	private ValueVisitor valueVisitor;
 	private TypeCheckVisitor typeCheckVisitor;
-	private ExprNameVisitor exprNameVisitor;
 	public TextVisitor(PrintWriter writer, Program program) {
 		super(writer);
-		exprNameVisitor = new ExprNameVisitor(writer);
 		addrVisitor = new AddrVisitor(writer,program);
 		valueVisitor = new ValueVisitor(writer,program);
 		typeCheckVisitor = new TypeCheckVisitor();
@@ -60,16 +58,15 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 			emit("addi",Register.sp.toString(),Register.sp.toString(),"-4");
             if (i<4){
                 emit("move",r.toString(),Register.paramRegs[i].toString(),null);
-
+                r.forParam = true;
             }
             else {
-                //TODO
 				Register tmp = fd.params.get(i).paramRegister;
 				emit("move",r.toString(),tmp.toString(),null);
 				freeRegs.freeRegister(tmp);
+				r.forParam = true;
             }
 			emit("sw",r.toString(),"0("+Register.sp.toString()+")",null);
-            r.forParam = true;
             fd.params.get(i).paramRegister = r;
         }
 //        emit("move",Register.fp.toString(), Register.sp.toString(),null);
@@ -94,8 +91,14 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 				return null;
 			case "main":
 				writer.println(p.name + ":");
-                p.block.FuncName = p;
 				p.block.accept(this);
+				if (p.type == BaseType.VOID)
+					emit("li", Register.v0.toString(), "10", null);
+				else {
+					emit("move", Register.paramRegs[0].toString(), Register.v0.toString() ,null);
+					emit("li", Register.v0.toString(), "17", null);
+				}
+				writer.println("syscall");
 				return null;
 			default:
 				writer.println(p.name + ":");
@@ -125,12 +128,14 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		Register lhsRegister = a.lhs.accept(addrVisitor);
 		Register rhsRegister = a.rhs.accept(valueVisitor);
 		Type lhs = a.lhs.accept(typeCheckVisitor);
+		//TODO:check
 		if (lhs instanceof PointerType)
 			((PointerType) lhs).register = rhsRegister;
-//		if (lhs instanceof ArrayType)
-//		    ((ArrayType) lhs).register = rhsRegister;
 		if (rhsRegister != null){
 			Type rhs = a.rhs.accept(typeCheckVisitor);
+			// special case for char* a = (char*)"string";
+			if (rhs instanceof PointerType && ((PointerType) rhs).type==BaseType.CHAR)
+				rhsRegister.forParam = true;
 			if (rhs == BaseType.CHAR)
 				emit("sb",rhsRegister.toString(),"0("+lhsRegister.toString()+")",null);
 			else {
@@ -139,13 +144,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		}
 
 		freeRegs.freeRegister(lhsRegister);
-		if (rhsRegister.segment == Register.sp)
-		    freeRegs.freeRegister(rhsRegister);
-		else{
-		    String name = a.lhs.accept(exprNameVisitor);
-            freeRegs.DynamicAddr.put(name,rhsRegister);
-        }
-
+		freeRegs.freeRegister(rhsRegister);
 		return null;
 	}
 
@@ -223,7 +222,7 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		emit("j","endif"+idx,null,null);
 		writer.println("else"+idx+":");
 		if (i.elseStmt!=null){
-		    i.elseStmt.FuncName = i.FuncName;
+			i.elseStmt.FuncName = i.FuncName;
 			i.elseStmt.accept(this);
 		}
 		writer.println("endif"+idx+":");
@@ -257,7 +256,6 @@ public class TextVisitor extends BaseGenVisitor<Register> {
 		Register register = null;
 		if (!b.stmts.isEmpty()){
 			for (Stmt s: b.stmts){
-			    s.FuncName = b.FuncName;
 				s.accept(this);
 			}
 		}
@@ -293,15 +291,16 @@ public class TextVisitor extends BaseGenVisitor<Register> {
             reloadRegister(freeRegs.earlyReturn);
             emit("jr", Register.ra.toString(), null, null);
         }
+        // early return for main
         if (r.FuncName.name.equals("main")){
-            if (r.FuncName.type == BaseType.VOID)
-                emit("li", Register.v0.toString(), "10", null);
-            else {
-                emit("move", Register.paramRegs[0].toString(), Register.v0.toString() ,null);
-                emit("li", Register.v0.toString(), "17", null);
-            }
-            writer.println("syscall");
-        }
+			if (r.FuncName.type == BaseType.VOID)
+				emit("li", Register.v0.toString(), "10", null);
+			else {
+				emit("move", Register.paramRegs[0].toString(), Register.v0.toString() ,null);
+				emit("li", Register.v0.toString(), "17", null);
+			}
+			writer.println("syscall");
+		}
 		return null;
 	}
 }

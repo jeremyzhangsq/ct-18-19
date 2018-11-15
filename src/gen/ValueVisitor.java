@@ -158,31 +158,36 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 				ar = freeRegs.getRegister();
 				Register param = Register.paramRegs[0];
 				emit("move",ar.toString(),param.toString(),null);
-				emit("li", Register.v0.toString(), "4", null);
 				Type t = fce.params.get(0).accept(typeCheckVisitor);
-				if (t instanceof PointerType && ((PointerType) t).register != null)
-					emit("la", param.toString(), "0(" + ((PointerType) t).register.toString() + ")", null);
+				Expr e = fce.params.get(0);
+				if (t instanceof PointerType && ((PointerType) t).register != null){
+                    emit("li", Register.v0.toString(), "4", null);
+                    emit("la", param.toString(), "0(" + ((PointerType) t).register.toString() + ")", null);
+                    writer.println("syscall");
+                }
+				else if (e instanceof TypecastExpr && ((TypecastExpr) e).expr instanceof VarExpr && ((TypecastExpr) e).expr.type instanceof ArrayType){
+                    //TODO:for array string
+                    int size = ((ArrayType) ((TypecastExpr) e).expr.type).arrSize;
+                    for (int i = 0;i<size;i++){
+                        emit("li", Register.v0.toString(), "4", null);
+                        emit("la", param.toString(),((VarExpr) ((TypecastExpr) e).expr).vd.offset.peek()+i*4+"("+Register.sp.toString()+")",null);
+                        writer.println("syscall");
+                    }
+				}
+				else if (e instanceof TypecastExpr && ((TypecastExpr) e).expr instanceof StrLiteral){
+                    emit("li", Register.v0.toString(), "4", null);
+                    emit("la", param.toString(), freeRegs.Strs.get(((StrLiteral) (((TypecastExpr) (fce.params.get(0))).expr)).val), null);
+                    writer.println("syscall");
+                }
 				else
-					emit("la", param.toString(), freeRegs.Strs.get(((StrLiteral) (((TypecastExpr) (fce.params.get(0))).expr)).val), null);
-				writer.println("syscall");
+				    writer.println("error string type");
 				// return a0 value from tmp back to a0
 				emit("move",param.toString(),ar.toString(),null);
 				freeRegs.freeRegister(ar);
 				return null;
 			}
 			case "mcmalloc":
-				ar = freeRegs.getRegister();
-				Register param = Register.paramRegs[0];
-				emit("move",ar.toString(),param.toString(),null);
-				Register size = fce.params.get(0).accept(this);
-				emit("li", Register.v0.toString(), "9", null);
-				emit("move",param.toString(),size.toString(),null); // move required byte size to a0
-				writer.println("syscall");
-				emit("move",size.toString(),Register.v0.toString(),null); // use 'size' to store returned addr
-				emit("move",param.toString(),ar.toString(),null);
-				freeRegs.freeRegister(ar);
-				size.segment = null;
-				return size;
+				return null;
 			default:
 				fce.fd.Occupied = freeRegs.getOccupyRegs();
 				int cnt = 0;
@@ -275,32 +280,32 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
 
         if (v.type instanceof ArrayType || v.type instanceof StructType)
 			return addrRegister;
-        if (v.type instanceof PointerType)
-        	return addrRegister;
-        emit(cmd,result.toString(),"0("+addrRegister.toString()+")",null);
+
         freeRegs.freeRegister(addrRegister);
+        emit(cmd,result.toString(),"0("+addrRegister.toString()+")",null);
 		return result;
 	}
 
-	@Override
-	public Register visitValueAtExpr(ValueAtExpr vae) {
-		Register addrRegister = vae.val.accept(this);
-		Register result = freeRegs.getRegister();
-		String cmd = "lw";
-		emit(cmd,result.toString(),"0("+addrRegister.toString()+")",null);
-		if (vae.type == BaseType.CHAR)
-			cmd = "lb";
-		emit(cmd,addrRegister.toString(),"0("+result.toString()+")",null);
-		freeRegs.freeRegister(result);
-		return addrRegister;
-	}
+    @Override
+    public Register visitValueAtExpr(ValueAtExpr vae) {
+        Register addrRegister = vae.val.accept(this);
+        Register result = freeRegs.getRegister();
+        String cmd = "lw";
+        emit(cmd,result.toString(),"0("+addrRegister.toString()+")",null);
+        if (vae.type == BaseType.CHAR)
+            cmd = "lb";
+        emit(cmd,addrRegister.toString(),"0("+result.toString()+")",null);
+        freeRegs.freeRegister(result);
+        return addrRegister;
+    }
 
-	@Override
+    @Override
 	public Register visitArrayAccessExpr(ArrayAccessExpr aae) {
 		aae.arr.paramIndex = aae.paramIndex;
 		Register idxRegister = aae.idx.accept(this);
 		Register addrRegister = aae.arr.accept(this);
 		Register result = freeRegs.getRegister();
+		Register addr = freeRegs.getRegister();
 		Register offset = freeRegs.getRegister();
         if (aae.arr.type == BaseType.CHAR)
             emit("li",offset.toString(),"1",null);
@@ -308,13 +313,14 @@ public class ValueVisitor extends BaseGenVisitor<Register>{
             emit("li",offset.toString(),"4",null);
 		emit("mult",offset.toString(),idxRegister.toString(),null);
 		emit("mflo",offset.toString(),null,null);
-		emit("add",addrRegister.toString(),addrRegister.toString(),offset.toString());
+		emit("add",addr.toString(),addrRegister.toString(),offset.toString());
 		if (aae.arr.type == BaseType.CHAR)
-			emit("lb",result.toString(),"0("+addrRegister+")",null);
+			emit("lb",result.toString(),"0("+addr+")",null);
 		else
-			emit("lw",result.toString(),"0("+addrRegister+")",null);
+			emit("lw",result.toString(),"0("+addr+")",null);
 		freeRegs.freeRegister(idxRegister);
 		freeRegs.freeRegister(addrRegister);
+		freeRegs.freeRegister(addr);
 		freeRegs.freeRegister(offset);
 //		aae.paramRegister = result;
 		return result;
