@@ -25,8 +25,17 @@ namespace {
           }
         }
       }
-
+      std :: map<std::string, int> :: iterator i = opCounter.begin();
+      std :: map<std::string, int> :: iterator e = opCounter.end();
+      while (i != e) {
+        errs() << i->first << ": " << i->second << "\n";
+        i++;
+      }
+      errs() << "\n";
+      opCounter.clear();
+      return false;
     }
   };
 }
-
+char CountOp :: ID = 0;
+static RegisterPass<CountOp> X ("opCounter", "Counts opcodes per functions");
