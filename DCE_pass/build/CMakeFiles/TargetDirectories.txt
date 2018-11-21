@@ -1,6 +1,0 @@
-/afs/inf.ed.ac.uk/user/s18/s1885540/llvm-pass-skeleton/build/CMakeFiles/edit_cache.dir
-/afs/inf.ed.ac.uk/user/s18/s1885540/llvm-pass-skeleton/build/CMakeFiles/rebuild_cache.dir
-/afs/inf.ed.ac.uk/user/s18/s1885540/llvm-pass-skeleton/build/CMakeFiles/intrinsics_gen.dir
-/afs/inf.ed.ac.uk/user/s18/s1885540/llvm-pass-skeleton/build/skeleton/CMakeFiles/rebuild_cache.dir
-/afs/inf.ed.ac.uk/user/s18/s1885540/llvm-pass-skeleton/build/skeleton/CMakeFiles/edit_cache.dir
-/afs/inf.ed.ac.uk/user/s18/s1885540/llvm-pass-skeleton/build/skeleton/CMakeFiles/SkeletonPass.dir
