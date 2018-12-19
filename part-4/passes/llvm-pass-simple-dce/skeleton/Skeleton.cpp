@@ -19,14 +19,11 @@ namespace {
      while(true){	
       for (Function::iterator bb = F.begin(), e = F.end(); bb != e; ++bb) {
         for (BasicBlock::iterator i = bb->begin(), e = bb->end(); i != e; ++i) {
-            // if (i->isTerminator()) continue;
-            // if (i->mayHaveSideEffects()) continue;
-            // for (auto it = i->begin(); it != i->end()l it++){
+   
               Instruction *inst = &*i;
               if (llvm :: isInstructionTriviallyDead(inst, nullptr)){
                 DCL.push_back(inst);
               }
-            // }
         }
       
       }
@@ -47,5 +44,5 @@ namespace {
 char SimpleDCE :: ID = 0;
 __attribute__((unused)) static RegisterPass<SimpleDCE>
     X("skeletonpass", "Simple dead code elimination");
-
+//
 // cmd ~/ug3-ct/build/bin/opt -load ~/dce-pass/build/dce/libSkeletonPass.so -mem2reg ./dead.ll -o nodce.ll -S
